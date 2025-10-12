@@ -68,6 +68,18 @@
 
   .smalltext{font-size:15px; line-height:1.6; margin-top:2px}
   @media(min-width:768px){ .smalltext{font-size:16px} }
+
+  /* Intro images: centered + responsive */
+  .intro-img{
+    display:block;
+    margin:40px auto;
+    width:100%;
+    max-width:300px;
+    height:auto;
+  }
+  @media (max-width: 767px){
+    .intro-img{ width:40%; max-width:none; }
+  }
 </style>
 </head>
 <body>
@@ -81,21 +93,48 @@
 <div class="container">
   <div class="card" id="intro">
     <img src="https://static.wixstatic.com/media/ba9378_6cf0a9546a4540848bfb508a063f5e4d~mv2.png" alt="Travel First Banner" class="banner" />
-    <p class="muted" style="white-space:pre-line; margin: 0 auto">
-那是一個清晨，機場的廣播正播放著熟悉的旋律。
-你拉著行李，抬頭望向出發大廳的航班螢幕，
-上面閃爍著一行奇妙的字樣——「Travel First：前往未知的旅程」
 
-你深吸一口氣，準備登機。
-五位各有個性的旅人正等著你——
-感性、理性、熱血、可靠、與放空。
-他們齊聲說：「跟我們一起去旅行吧！」
+    <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
+      那是一個清晨<br>機場的廣播正播放著熟悉的旋律
+    </p>
+    <img src="https://static.wixstatic.com/media/ba9378_c7658e27e63e455186ef53f5f51256ef~mv2.png" alt="intro1" class="intro-img">
 
-這趟旅程將帶你經歷美好時光、冒險與驚喜。
-準備好了嗎？登機口開啟！</p>
-    <p class="muted" style="text-align:center;margin-top:6px"><em>*本測驗一共12題，作答約需3分鐘*</em></p>
-    <div class="center" style="margin-top:8px"><button class="btn big" id="startBtn">準備出發</button></div>
-  </div>
+    <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
+      你拉著行李<br>抬頭望向出發大廳的航班螢幕<br>上面閃爍著一行奇妙的字樣
+    </p>
+    <img src="https://static.wixstatic.com/media/ba9378_ac03e8c8ca6a4d2c8647dc3843ac182a~mv2.png" alt="intro2" class="intro-img">
+
+    <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
+      「Travel First：前往未知的旅程」
+    </p>
+
+    <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
+      你深吸一口氣，準備登機
+    </p>
+
+    <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
+      登機門前<br>五位各有個性的旅人正等著你
+    </p>
+    <img src="https://static.wixstatic.com/media/ba9378_e79ea078aa014f1cae8eb861a3d11050~mv2.png" alt="intro3" class="intro-img">
+
+    <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
+      他們齊聲說：<br>「跟我們一起去旅行吧！」
+    </p>
+
+    <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
+      這趟旅程將帶你經歷美好時光、冒險與驚喜。<br>準備好了嗎？
+    </p>
+
+    <p style="text-align:center; font-weight:bold; font-size:1.2em;">登機口開啟！</p>
+
+    <p class="muted" style="text-align:center;margin-top:6px">
+      <em>*本測驗一共12題，作答約需3分鐘*</em>
+    </p>
+
+    <div class="center" style="margin-top:8px; text-align:center;">
+      <button class="btn big" id="startBtn">準備出發</button>
+    </div>
+</div>
 
   <div class="card" id="quiz" style="display:none">
     <div class="progress"><div class="bar" id="bar"></div></div>

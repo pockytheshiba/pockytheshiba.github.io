@@ -1318,5 +1318,46 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 
+
+<script>
+// === SHAREBLOCK: Mobile direct-nav to m.facebook.com sharer; desktop popup ===
+(function(){
+  var btn = document.getElementById('shareFB');
+  if(!btn) return;
+
+  // remove prior listeners
+  var clone = btn.cloneNode(true);
+  btn.parentNode.replaceChild(clone, btn);
+
+  var PUBLIC_URL = (function(){
+    var href = (location.href || '').split('#')[0];
+    if(/^https?:\/\//i.test(href)) return href;
+    return 'https://pockytheshiba.github.io/';
+  })();
+
+  function isMobile(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||''); }
+
+  clone.addEventListener('click', function(e){
+    try{
+      e.preventDefault(); e.stopImmediatePropagation();
+      var mobileSharer = 'https://m.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PUBLIC_URL);
+      var desktopSharer = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PUBLIC_URL);
+
+      if(isMobile()){
+        // Use same-tab navigation on mobile to avoid popup blockers & in-app issues
+        location.href = mobileSharer;
+      }else{
+        var w = null;
+        try{ w = window.open(desktopSharer, '_blank', 'noopener'); }catch(_e){}
+        if(!w || w.closed){ location.href = desktopSharer; }
+      }
+    }catch(err){
+      console.error('[FB share mobile-direct]', err);
+      location.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PUBLIC_URL);
+    }
+  }, true);
+})();
+</script>
+
 </body>
 </html>

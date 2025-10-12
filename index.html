@@ -1174,5 +1174,40 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 
+
+<script>
+// === FB SHARE PATCH v3: clone to remove old listeners; robust desktop/mobile; warn on local files ===
+(function(){
+  var btn = document.getElementById('shareFB');
+  if(!btn) return;
+  // remove previous listeners by cloning
+  var clone = btn.cloneNode(true);
+  btn.parentNode.replaceChild(clone, btn);
+  clone.addEventListener('click', function(ev){
+    try{
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      var href = (location.href || '').split('#')[0];
+      var proto = location.protocol || '';
+      if(!(proto === 'http:' || proto === 'https:')){
+        alert('要分享到 Facebook，請先把這個頁面上傳到可公開瀏覽的網址（HTTPS）。目前是本機/非公開路徑，Facebook 無法抓取頁面內容，會導致分享錯誤。');
+        return;
+      }
+      var shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(href);
+      var w = null;
+      try{ w = window.open(shareUrl, '_blank', 'noopener'); }catch(_e){}
+      if(!w || w.closed){
+        // fallback: same-tab navigation to avoid popup blockers
+        location.href = shareUrl;
+      } else {
+        // ensure popup gets focus on some browsers
+        try{ w.focus(); }catch(_e){}
+      }
+    }catch(e){
+      console.error('[FB share v3]', e);
+    }
+  }, true);
+})();
+</script>
+
 </body>
 </html>

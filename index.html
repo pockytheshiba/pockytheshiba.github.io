@@ -80,6 +80,10 @@
   @media (max-width: 767px){
     .intro-img{ width:70%; max-width:none; }
   }
+
+  /*BTN_2X*/
+  .btn{ font-size: 1.6em; padding: 1.1em 1.4em; }
+  .btn.big{ font-size: 1.8em; padding: 1.2em 1.6em; }
 </style>
 </head>
 <body>
@@ -91,9 +95,11 @@
 </div>
 
 <div class="container">
-  <div class="card" id="intro">
-    <img src="https://static.wixstatic.com/media/ba9378_6cf0a9546a4540848bfb508a063f5e4d~mv2.png" alt="Travel First Banner" class="banner" />
-
+  
+<div id="topBanner" style="text-align:center; padding:8px 0;">
+  <img src="https://static.wixstatic.com/media/ba9378_ab27a556851549cc94b0a0b36abc861a~mv2.png" alt="banner" style="width:80%; max-width:80%; height:auto; display:inline-block;">
+</div>
+<div class="card" id="intro">
     <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
       那是一個清晨<br>機場的廣播正播放著熟悉的旋律
     </p>
@@ -826,5 +832,28 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 
+
+<script>
+/*BANNER_VISIBILITY*/
+(function(){
+  var banner = document.getElementById('topBanner');
+  function hideBanner(){ if(banner) banner.style.display='none'; }
+  function showBanner(){ if(banner) banner.style.display='block'; }
+  // Show on load (intro page)
+  showBanner();
+  // Hide when starting the quiz
+  var sb = document.getElementById('startBtn');
+  if(sb){ sb.addEventListener('click', hideBanner); }
+  // Also hide whenever questions are rendered
+  if(typeof window.renderQuestion === 'function'){
+    var _rq = window.renderQuestion;
+    window.renderQuestion = function(){
+      hideBanner();
+      return _rq.apply(this, arguments);
+    };
+  }
+  // If there is a "back to intro" flow in future, you can call showBanner();
+})();
+</script>
 </body>
 </html>

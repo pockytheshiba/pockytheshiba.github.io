@@ -59,13 +59,15 @@
 #heroImg{justify-content:center; align-items:center; padding-top:14px; margin:10px 0 6px;}
 #charImg{max-height:640px; width:auto; height:auto; max-width:100%; object-fit:contain; background:transparent; border:none; margin:0;}
 #result #title{margin-top:6px;}
-""
 .shareBlock{margin-top:16px; text-align:center}
 .shareBlock h3{margin:0 0 8px; font-size:16px; font-weight:800}
 .shareRow{display:flex; justify-content:center; align-items:center; gap:14px; flex-wrap:nowrap}
 .iconBtn{appearance:none; background:transparent; border:0; padding:0; cursor:pointer; line-height:0}
 .iconBtn img{display:block; width:56px; height:56px; object-fit:contain}
 @media(min-width:768px){ .iconBtn img{width:64px; height:64px} }
+
+  .smalltext{font-size:15px; line-height:1.6; margin-top:2px}
+  @media(min-width:768px){ .smalltext{font-size:16px} }
 </style>
 </head>
 <body>
@@ -100,6 +102,7 @@
     <div id="questionContainer"></div>
     <div class="navRow" id="navRow">
       <button class="btn secondary" id="prevBtn">回上一題</button>
+      <button class="btn" id="nextBtn">下一題</button>
     </div>
   </div>
 
@@ -360,6 +363,145 @@ function computeAndShow(){
 </script>
 
 <script>
+// ===== UI Runtime (final stable: shuffle once + manual next + safe overlay) =====
+(function(){
+  // Safety: always try to hide overlay in case of partial errors
+  function hideOverlay(){ try{ var el=document.getElementById('overlay'); if(el) el.classList.add('hide'); }catch(e){} }
+  // Hide on DOM ready and as a last resort after 5s
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(hideOverlay, 400); });
+  }else{
+    setTimeout(hideOverlay, 400);
+  }
+  setTimeout(hideOverlay, 5000);
+
+  function boot(){
+    const qData = (typeof questions!=='undefined') ? questions : [];
+    const quiz=document.getElementById("quiz");
+    const intro=document.getElementById("intro");
+    const qWrap=document.getElementById("questionContainer");
+    const bar=document.getElementById("bar");
+    const btnPrev=document.getElementById("prevBtn");
+    const btnNext=document.getElementById("nextBtn");
+    const navRow=document.getElementById("navRow");
+    const loading=document.getElementById("loading");
+    const result=document.getElementById("result");
+    const startBtn=document.getElementById("startBtn");
+
+    // Guard: if critical elements missing, abort gracefully
+    if(!quiz || !intro || !qWrap || !bar || !btnPrev || !navRow || !loading || !result || !startBtn){
+      console.error("[TF] Missing critical DOM elements, aborting UI init.");
+      hideOverlay();
+      return;
+    }
+    if(!Array.isArray(qData) || qData.length===0){
+      console.error("[TF] questions array is empty or undefined. UI cannot render questions.");
+      hideOverlay();
+      return;
+    }
+
+    let idx=0;
+    window.picks = Array(qData.length).fill(null);
+    // initialize per-question shuffle once
+    if(!window.shuffleMap){
+      function makeShuffle(n){
+        const a = Array.from({length:n}, (_, i) => i);
+        for(let i=a.length-1; i>0; i--){
+          const j = Math.floor(Math.random() * (i+1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      window.shuffleMap = qData.map(q => makeShuffle((q.opts||[]).length));
+    }
+
+,(_,i)=>i); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+      window.shuffleMap = qData.map(q => makeShuffle((q.opts||[]).length));
+    }
+
+
+    function clean(s){
+  if(!s) return '';
+  return (''+s)
+    .replace(/\n/g, '')  // remove literal backslash-n
+    .replace(/
+/g, '')    // remove real newlines
+    .replace(/
+/g, '')    // remove carriage returns
+    .trim();
+}
+
+    function makeShuffle(n){
+      const arr=Array.from({length:n},(_,i)=>i);
+      for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+      }
+      return arr;
+    }
+    const shuffleMap = qData.map(q=>makeShuffle(q.opts.length));
+
+    function firstUnanswered(){ for(let i=0;i<qData.length;i++) if(picks[i]==null) return i; return -1; }
+
+    
+
+    function goLoadingThenResult(){
+      const miss=firstUnanswered();
+      if(miss!==-1){ alert("還有題目尚未作答，將帶你回到未完成的題目。"); idx=miss; renderQuestion(); return; }
+      quiz.style.display='none';
+      loading.style.display='block';
+      setTimeout(()=>{
+        try{ computeAndShow(); loading.style.display='none'; }
+        catch(err){ console.error(err); loading.style.display='none'; alert("結果計算出了小問題，請再試一次。"); location.reload(); }
+      },4000);
+    }
+
+    // Bind events
+    startBtn.addEventListener('click', function(){
+      intro.style.display='none';
+      quiz.style.display='block';
+      idx=0;
+      renderQuestion();
+    });
+    btnPrev.addEventListener('click', function(){ if(idx>0){ idx--; renderQuestion(); } });
+    if(btnNext){
+      return; }
+        if(idx<qData.length-1){ idx++; renderQuestion(); }
+        else{ goLoadingThenResult(); }
+      });
+    }
+
+    // Finally ensure overlay is gone
+    
+    // Enforce manual-next with selection check
+    if(btnNext){
+      btnNext.onclick = function(){
+        if(picks[idx]==null){
+          alert("請先選擇一個選項喔！");
+          return;
+        }
+        if(idx < qData.length - 1){
+          idx++;
+          renderQuestion();
+        }else{
+          for(let i=0;i<qData.length;i++){ if(picks[i]==null){ idx=i; renderQuestion(); return; } }
+          goLoadingThenResult();
+        }
+      };
+    }
+    hideOverlay();
+  }
+
+  // Ensure boot runs after DOM is ready
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', boot);
+  }else{
+    boot();
+  }
+})();
+</script>
+
+<script>
 // ===== UI Runtime =====
 window.addEventListener('load',()=>{ setTimeout(()=>document.getElementById('overlay').classList.add('hide'),350); });
 
@@ -377,43 +519,64 @@ let idx=0;
 window.picks=Array(qData.length).fill(null);
 
 // Remove literal '\n'
-function clean(s){ return (s||'').replace(/\\n/g,''); }
+function clean(s){ return (s||'').replace(/\\r?\\n/g,'').replace(/\\n/g,''); }
 
 function firstUnanswered(){for(let i=0;i<qData.length;i++) if(picks[i]==null) return i; return -1;}
 
 function renderQuestion(){
   const q=qData[idx];
-  qWrap.innerHTML=`<div class="qtitle">${clean(q.title)||''}</div>
+  
+  // Lazy init shuffleMap once (per-question option order)
+  if(!window.shuffleMap){
+    function __mk(n){ const a=Array.from({length:n},(_,i)=>i); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+    window.shuffleMap = qData.map(q => __mk((q.opts||[]).length));
+  }
+qWrap.innerHTML=`<div class="qtitle">${clean(q.title)||''}</div>
                    <div class="qbody">${clean(q.body)||''}</div>`
-    + q.opts.map((t,i)=>{
-      const checked=(picks[idx]===i)?'checked':'';
-      return `<label class="opt ${checked?'selected':''}"><input type="radio" name="q${idx}" value="${i}" ${checked}> <div class="opt-text">${clean(t)}</div></label>`;
-    }).join("");
+    + ( (window.shuffleMap && window.shuffleMap[idx]) ? window.shuffleMap[idx] : (q.opts||[]).map((_,i)=>i) )
+    .map((orig)=>{
+      const checked = (picks[idx]===orig)?'checked':'';
+      const selected = (picks[idx]===orig)?'selected':'';
+      return `<label class="opt ${selected}"><input type="radio" name="q${idx}" value="${orig}" ${checked}> <div class="opt-text">${clean(q.opts[orig])}</div></label>`;
+    }).join("")
+  ;
 
   qWrap.querySelectorAll(`input[name="q${idx}"]`).forEach(r=>{
     r.addEventListener("change",e=>{
       picks[idx]=parseInt(e.target.value,10);
       qWrap.querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
       e.target.closest(".opt").classList.add("selected");
-      setTimeout(()=>{
-        const nextMissing=firstUnanswered();
-        if(idx<qData.length-1){
-          idx=Math.max(idx+1, nextMissing===-1?idx+1:nextMissing);
-          renderQuestion();
-        }else{
-          if(nextMissing!==-1){ idx=nextMissing; renderQuestion(); }
-          else { goLoadingThenResult(); }
-        }
-      },120);
-    },{passive:true});
+      },{passive:true});
   });
 
   bar.style.width=((idx)/qData.length*100)+"%";
 
   // Q1 hide prev
-  if(idx===0){ navRow.style.display='none'; } else { navRow.style.display='flex'; }
+  navRow.style.display='flex'; if(idx===0){ btnPrev.style.display='none'; } else { btnPrev.style.display='inline-flex'; }
 
   window.scrollTo({top:quiz.offsetTop-8,behavior:'smooth'});
+
+  // --- Minimal post-formatting: split Qn｜ and move rest into small text ---
+  (function(){
+    try{
+      var t = qWrap.querySelector('.qtitle');
+      var b = qWrap.querySelector('.qbody');
+      if(t && b){
+        var txt = (t.textContent||'').trim();
+        var m = txt.match(/^Q\d+\s*[｜\|:\：\-\.\s]*/);
+        if(m){
+          var head = m[0].trim().replace(/[\s\|:\：\-\.]*$/, ''); if(!head.endsWith('｜')) head += '｜';
+          var tail = txt.slice(m[0].length).trim();
+          t.textContent = head;
+          if(tail){
+            b.classList.add('smalltext');
+            b.textContent = (b.textContent ? (b.textContent + ' ') : '') + tail;
+          }
+        }
+      }
+    }catch(e){ console.warn('[format]', e); }
+  })();
+
 }
 
 function goLoadingThenResult(){
@@ -577,5 +740,52 @@ document.getElementById("shareLine").onclick=()=>window.open(`https://line.me/R/
 document.getElementById("shareFB").onclick=()=>window.open(`https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}&quote=${enc(shareText())}`,"_blank");
 document.getElementById("shareThreads").onclick=()=>window.open(`https://www.threads.net/intent/post?text=${enc(shareText())}`,"_blank");
 </script>
+
+<script>
+/*MANUAL_NEXT_FALLBACK*/
+(function(){
+  try{
+    var btnNext = document.getElementById('nextBtn');
+    var btnPrev = document.getElementById('prevBtn');
+    if(btnNext && !btnNext.onclick){
+      btnNext.onclick = function(){
+        try{
+          if(typeof idx==='undefined' || typeof picks==='undefined' || typeof qData==='undefined'){ return; }
+          if(picks[idx]==null){ alert("請先選擇一個選項喔！"); return; }
+          if(idx < qData.length - 1){ idx++; renderQuestion(); }
+          else{
+            for(var i=0;i<qData.length;i++){ if(picks[i]==null){ idx=i; renderQuestion(); return; } }
+            if(typeof goLoadingThenResult==='function') goLoadingThenResult();
+          }
+        }catch(e){}
+      };
+    }
+  }catch(e){}
+})();
+</script>
+
+
+<script>
+/*STRICT_NEXT_HANDLER*/
+(function(){
+  try{
+    var btnNext = document.getElementById('nextBtn');
+    if(btnNext){
+      btnNext.onclick = function(){
+        try{
+          if(typeof idx==='undefined' || typeof picks==='undefined' || typeof qData==='undefined'){ return; }
+          if(picks[idx]==null){ alert("請先選擇一個選項喔！"); return; }
+          if(idx < qData.length - 1){ idx++; renderQuestion(); }
+          else{
+            for(var i=0;i<qData.length;i++){ if(picks[i]==null){ idx=i; renderQuestion(); return; } }
+            if(typeof goLoadingThenResult==='function') goLoadingThenResult();
+          }
+        }catch(e){}
+      };
+    }
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>

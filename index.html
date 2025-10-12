@@ -1249,5 +1249,74 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 
+
+<script>
+// === SHAREBLOCK: FB mobile deep-link with robust fallbacks (ONLY this button) ===
+(function(){
+  var btn = document.getElementById('shareFB');
+  if(!btn) return;
+
+  // remove any previous listeners
+  var clone = btn.cloneNode(true);
+  btn.parentNode.replaceChild(clone, btn);
+
+  function isMobile(){
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'');
+  }
+  function inFBInApp(){
+    var ua = navigator.userAgent||'';
+    return ua.indexOf('FBAN')>-1 || ua.indexOf('FBAV')>-1;
+  }
+  function publicURL(){
+    var href = (location.href||'').split('#')[0];
+    if(/^https?:\/\//i.test(href)) return href;
+    // fallback to your public site if current is not http/https (e.g., local file/sandbox preview)
+    return 'https://pockytheshiba.github.io/';
+  }
+  function openWebSharer(){
+    var url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(publicURL());
+    var w = null;
+    try{ w = window.open(url, '_blank', 'noopener'); }catch(_e){}
+    if(!w || w.closed){ location.href = url; }
+  }
+  function openAppDeepLink(){
+    var target = 'fb://facewebmodal/f?href=' + encodeURIComponent(publicURL());
+    // try via hidden anchor to avoid popup blockers
+    var a = document.createElement('a');
+    a.href = target;
+    document.body.appendChild(a);
+    var fired = false;
+    var timer = setTimeout(function(){
+      if(!fired){
+        // app not handled -> fallback to web sharer
+        openWebSharer();
+      }
+    }, 800);
+    a.click();
+    // cleanup quickly
+    setTimeout(function(){
+      fired = true;
+      try{ document.body.removeChild(a); }catch(e){}
+    }, 50);
+  }
+
+  clone.addEventListener('click', function(ev){
+    try{
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      if(isMobile() && !inFBInApp()){
+        // Prefer opening FB app if installed; otherwise graceful fallback to web sharer
+        openAppDeepLink();
+      }else{
+        // Desktop or already in FB in-app browser
+        openWebSharer();
+      }
+    }catch(e){
+      console.error('[FB share deep link]', e);
+      openWebSharer();
+    }
+  }, true);
+})();
+</script>
+
 </body>
 </html>

@@ -312,7 +312,20 @@
       <div class="partners" id="partners"></div>
     </div>
 
-    <div class="shareBlock"><h3>將結果分享至：</h3><div class="shareRow"><div class="shareRow"><button class="iconBtn" id="shareLine" aria-label="Share to LINE"><img src="https://static.wixstatic.com/media/ba9378_76e7805d6e5a47f9b75b99d452aa89ba~mv2.png" alt="LINE" /></button><button class="iconBtn" id="shareFB" aria-label="Share to Facebook"><img src="https://static.wixstatic.com/media/ba9378_3bc563ef22974bd4adb473284cc8ca1a~mv2.png" alt="Facebook" /></button><button class="iconBtn" id="shareThreads" aria-label="Share to Threads"><img src="https://static.wixstatic.com/media/ba9378_f4fc9178433844e99014caf2d63bfe8e~mv2.png" alt="Threads" /></button><button class="iconBtn" id="exportBtn" aria-label="Export Image"><img src="https://static.wixstatic.com/media/ba9378_19383ab5b1ff4165915f6b0c4a358d8d~mv2.png" alt="匯出圖片" /></button></div></div></div><div class="center" style="margin-top:8px">
+    <div class="shareBlock"><h3>將結果分享至：</h3><div class="shareRow"><div class="shareRow"><button class="iconBtn" id="shareLine" aria-label="Share to LINE"><img src="https://static.wixstatic.com/media/ba9378_76e7805d6e5a47f9b75b99d452aa89ba~mv2.png" alt="LINE" /></button><button class="iconBtn" id="shareFB" aria-label="Share to Facebook"><img src="https://static.wixstatic.com/media/ba9378_3bc563ef22974bd4adb473284cc8ca1a~mv2.png" alt="Facebook" /></button><button class="iconBtn" id="shareThreads" aria-label="Share to Threads"><img src="https://static.wixstatic.com/media/ba9378_f4fc9178433844e99014caf2d63bfe8e~mv2.png" alt="Threads" /></button><button class="iconBtn" id="exportBtn" aria-label="Export Image"><img src="https://static.wixstatic.com/media/ba9378_19383ab5b1ff4165915f6b0c4a358d8d~mv2.png" alt="匯出圖片" /></button></div></div></div>
+<!-- Mobile Share Sheet (only for FB) -->
+<div id="shareMobileSheet" style="display:none; position:fixed; inset:auto 0 0 0; background:#fff; border-top-left-radius:16px; border-top-right-radius:16px; box-shadow:0 -8px 24px rgba(0,0,0,.2); padding:16px; z-index:99999;">
+  <div style="font-weight:800; font-size:16px; margin-bottom:10px; text-align:center;">選擇分享方式</div>
+  <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+    <button id="fbShareBrowser" class="btn" style="background:#1877F2; color:#fff;">用瀏覽器分享 Facebook</button>
+    <button id="sysShare" class="btn secondary">使用系統分享</button>
+    <button id="copyLink" class="btn secondary">複製連結</button>
+  </div>
+  <div style="text-align:center; margin-top:10px;">
+    <button id="closeSheet" class="btn secondary" style="font-size:14px;">關閉</button>
+  </div>
+</div>
+<div class="center" style="margin-top:8px">
       <button class="btn secondary big" id="retryBtn">重新作答</button>
     </div>
 
@@ -1356,6 +1369,93 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
       location.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PUBLIC_URL);
     }
   }, true);
+})();
+</script>
+
+
+<script>
+// === SHAREBLOCK: FB mobile share sheet (only within share section) ===
+(function(){
+  function $(id){ return document.getElementById(id); }
+  var fbBtn = $('shareFB');
+  if(!fbBtn) return;
+
+  // Clean old listeners
+  var clone = fbBtn.cloneNode(true);
+  fbBtn.parentNode.replaceChild(clone, fbBtn);
+  fbBtn = clone;
+
+  var sheet = $('shareMobileSheet');
+  var btnBrowser = $('fbShareBrowser');
+  var btnSys = $('sysShare');
+  var btnCopy = $('copyLink');
+  var btnClose = $('closeSheet');
+
+  var PUBLIC_URL = (function(){
+    var href = (location.href || '').split('#')[0];
+    if(/^https?:\/\//i.test(href)) return href;
+    return 'https://pockytheshiba.github.io/';
+  })();
+
+  function isMobile(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||''); }
+
+  // main FB button: on mobile open sheet; on desktop open sharer popup
+  fbBtn.addEventListener('click', function(ev){
+    ev.preventDefault(); ev.stopImmediatePropagation();
+    if(isMobile()){
+      if(sheet) sheet.style.display = 'block';
+    }else{
+      var url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PUBLIC_URL);
+      var w = null;
+      try{ w = window.open(url, '_blank', 'noopener'); }catch(_e){}
+      if(!w || w.closed){ location.href = url; }
+    }
+  }, true);
+
+  // Option 1: force browser sharer (avoid跳到App)
+  if(btnBrowser){
+    btnBrowser.addEventListener('click', function(){
+      var url = 'https://m.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PUBLIC_URL) + '&display=popup&ref=plugin&src=share_button';
+      // Use same-tab navigation to reduce popup block & app interception
+      location.href = url;
+    });
+  }
+
+  // Option 2: system share (使用者可選 FB App)
+  if(btnSys){
+    btnSys.addEventListener('click', function(){
+      if(navigator.share){
+        navigator.share({ title: document.title||'Travel First｜小旅伴家族心理測驗', url: PUBLIC_URL })
+          .catch(function(){ /* user cancel */ });
+      }else{
+        alert('此瀏覽器不支援系統分享，請改用「用瀏覽器分享 Facebook」或「複製連結」。');
+      }
+    });
+  }
+
+  // Option 3: copy link
+  if(btnCopy){
+    btnCopy.addEventListener('click', function(){
+      var ok = false;
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(PUBLIC_URL).then(function(){ alert('連結已複製，打開 Facebook 後貼上即可。'); });
+        ok = true;
+      }
+      if(!ok){
+        // fallback
+        var ta = document.createElement('textarea');
+        ta.value = PUBLIC_URL;
+        document.body.appendChild(ta);
+        ta.select();
+        try{ document.execCommand('copy'); alert('連結已複製，打開 Facebook 後貼上即可。'); }catch(e){ alert('請手動複製：' + PUBLIC_URL); }
+        document.body.removeChild(ta);
+      }
+    });
+  }
+
+  if(btnClose){
+    btnClose.addEventListener('click', function(){ if(sheet) sheet.style.display='none'; });
+  }
 })();
 </script>
 

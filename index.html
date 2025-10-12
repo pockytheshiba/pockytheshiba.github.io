@@ -92,6 +92,30 @@
       max-width: 95% !important;
     }
   }
+
+  /*RESULT_SPACING*/
+  .result-illustration {
+    margin-bottom: 30px !important; /* space between image and spinner */
+  }
+  @media (max-width: 768px) {
+    .result-illustration img {
+      width: 90% !important;
+      max-width: 90% !important;
+      height: auto;
+    }
+  }
+
+  /*RESULT_LOADING_TWEAK*/
+  #loading > img{
+    max-width: 90%;
+    height: auto;
+    margin: 6px auto 30px !important; /* add ~30px gap below silhouette image */
+    display: block;
+  }
+  #loading .plane{
+    margin-top: 0 !important; /* rely on image bottom margin to create spacing */
+  }
+
 </style>
 </head>
 <body>

@@ -1209,5 +1209,45 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 
+
+<script>
+// === SHAREBLOCK: Mobile-first FB share using Web Share API; desktop uses sharer ===
+(function(){
+  var fb = document.getElementById('shareFB');
+  if(!fb) return;
+  // remove previous listeners by cloning
+  var clone = fb.cloneNode(true);
+  fb.parentNode.replaceChild(clone, fb);
+
+  clone.addEventListener('click', function(ev){
+    try{
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      var url = (location.href || '').split('#')[0];
+      var title = document.title || 'Travel First｜小旅伴家族心理測驗';
+      var ua = navigator.userAgent || '';
+      var isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+
+      // Mobile: try system share sheet (most穩定，FB 安裝時可直接選)
+      if(isMobile && navigator.share){
+        navigator.share({title: title, url: url}).catch(function(e){
+          // user cancelled or not available -> fallback
+          var shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+          try{ window.open(shareUrl, '_blank', 'noopener'); } catch(_e) { location.href = shareUrl; }
+        });
+        return;
+      }
+
+      // Desktop or no Web Share API: use FB sharer with popup fallback
+      var shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+      var w = null;
+      try{ w = window.open(shareUrl, '_blank', 'noopener'); }catch(_e){}
+      if(!w || w.closed){ location.href = shareUrl; }
+    }catch(e){
+      console.error('[FB share mobile-first]', e);
+    }
+  }, true);
+})();
+</script>
+
 </body>
 </html>

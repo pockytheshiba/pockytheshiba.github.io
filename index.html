@@ -195,6 +195,10 @@
   margin: 0 0 8px;
 }
 
+
+/* === SHAREBLOCK: remove screenshot/export button globally === */
+#exportBtn{ display:none !important; }
+
 </style>
 </head>
 <body>
@@ -1126,6 +1130,45 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
           console.error('[export image]', err);
         });
       }catch(e){ console.error('[export image]', e); }
+    }, true);
+  }
+})();
+</script>
+
+
+<script>
+// === SHARE AREA PATCH (mobile FB sharer + cleanup) ===
+(function(){
+  function $(id){ return document.getElementById(id); }
+  var fbBtn = $('shareFB');
+  if(fbBtn){
+    fbBtn.addEventListener('click', function(ev){
+      try{
+        ev.preventDefault(); ev.stopImmediatePropagation();
+        var url = location.href.split('#')[0];
+        var enc = encodeURIComponent(url);
+        var ua = navigator.userAgent || '';
+        var isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+        var targets = isMobile
+          ? [
+              'https://m.facebook.com/sharer.php?u=' + enc,
+              'https://m.facebook.com/share.php?u=' + enc,
+              'https://www.facebook.com/sharer/sharer.php?u=' + enc
+            ]
+          : [
+              'https://www.facebook.com/share.php?u=' + enc,
+              'https://www.facebook.com/sharer/sharer.php?u=' + enc
+            ];
+        var opened = false;
+        for(var i=0;i<targets.length && !opened;i++){
+          var w = window.open(targets[i], '_blank', 'noopener');
+          if(w){ opened = true; }
+        }
+        if(!opened){
+          // final fallback: navigate current tab
+          location.href = targets[0];
+        }
+      }catch(e){ console.error('[FB share mobile patch]', e); }
     }, true);
   }
 })();

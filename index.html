@@ -754,29 +754,102 @@ function showResult(role,roleForVideos,mbti){
   try{ mainImg.classList.remove('pop-anim'); void mainImg.offsetWidth; mainImg.classList.add('pop-anim'); }catch(_e){}
   mainImg.style.border="none"; mainImg.style.background="transparent";
 
-  const videosMap={"旅先森":[{id:"2EWjKIjkbs8",url:"https://youtu.be/2EWjKIjkbs8",reason:"東京夜生活去哪裡？這邊絕對可以大開你的眼界"},
-                              {id:"TGGCPzwE3ZI",url:"https://youtu.be/TGGCPzwE3ZI",reason:"喜歡冒險？印度絕對可以為你的冒險日記寫下精彩的一頁"}],
-                    "卡邦":[{id:"BuVKTJ_sJvc",url:"https://youtu.be/BuVKTJ_sJvc",reason:"肉肉絕對是身強體壯的卡邦不可或缺的蛋白質來源"},
-                            {id:"PoTYEZZDb2A",url:"https://youtu.be/PoTYEZZDb2A",reason:"吃飽才能頭好壯壯，末日前必吃這三家"}],
-                    "卡美拉":[{id:"xrKUbp1VnQM",url:"https://youtu.be/xrKUbp1VnQM",reason:"到底誰說金鱗湖很無聊的？美到爆了好嗎！"},
-                             {id:"t9q4EMP-7zo",url:"https://youtu.be/t9q4EMP-7zo",reason:"要比美？泰姬瑪哈陵絕對是網美此生必訪的景點之一"}],
-                    "帕斯":[{id:"8oQZqFzb9pE",url:"https://youtu.be/8oQZqFzb9pE",reason:"到迪士尼「戰鬥」絕對需要詳細的規劃"},
-                            {id:"NbwlVmH3S74",url:"https://youtu.be/NbwlVmH3S74",reason:"這樣規劃路線購買伴手禮，又爽又順暢"}],
-                    "皮羅":[{id:"OEgDW0wpEAM",url:"https://youtu.be/OEgDW0wpEAM",reason:"大阪城市渡假首選飯店，整天在裡面Chill就好！"},
-                            {id:"SAOhPNSst98",url:"https://youtu.be/SAOhPNSst98",reason:"曼谷的住宿一家比一家厲害"}]};
-  const vids=videosMap[roleForVideos]||[];
-  const vidsEl=document.getElementById("videos"); vidsEl.innerHTML="";
-  vids.forEach(v=>{
-    const el=document.createElement("div");
-    el.className="videoCard";
-    el.innerHTML=`<div class="videoReason">${v.reason}</div>
-                  <a class="videoThumb" href="${v.url}" target="_blank" rel="noopener">
-                    <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="推薦影片縮圖">
-                  </a>`;
-    vidsEl.appendChild(el);
-  });
-
-  const partnersByMBTI={ENFP:[{code:"ISTJ",why:"理性與秩序讓你的靈感更落地。"}, {code:"ENFJ",why:"情感共鳴，旅途故事感滿分。"}],
+  
+  // --- videos: pool per role, pick 2 at random (cached per session) ---
+  (function(){
+    function ytIdFrom(url){
+      try{
+        if(!url) return "";
+        var u = new URL(url);
+        if(u.hostname === "youtu.be"){ return u.pathname.slice(1); }
+        if(u.hostname.indexOf("youtube.com")>-1){
+          var v = u.searchParams.get("v"); if(v) return v;
+          // fallback for /embed/ID
+          var m = u.pathname.match(/\/embed\/([^\/\?]+)/); if(m) return m[1];
+        }
+      }catch(e){}
+      // last resort: simple tail segment
+      var m2 = String(url).match(/([A-Za-z0-9_-]{6,})$/);
+      return m2 ? m2[1] : "";
+    }
+    function pickRandom(arr, n){
+      const a = (arr||[]).slice();
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a.slice(0, Math.min(n, a.length));
+    }
+    // Your provided links per role
+    const videosPoolRaw = {
+      "卡美拉":[
+        "https://youtu.be/xrKUbp1VnQM",
+        "https://youtu.be/BGmGat2kqWI",
+        "https://youtu.be/zkqtOzoPWOM",
+        "https://youtu.be/t9q4EMP-7zo",
+        "https://youtu.be/s0IgVSrMwB8",
+        "https://youtu.be/DCspJ1g3w_Y"
+      ],
+      "卡邦":[
+        "https://youtu.be/PoTYEZZDb2A",
+        "https://youtu.be/BuVKTJ_sJvc",
+        "https://youtu.be/PTDitegU_BY",
+        "https://youtu.be/YMtYL-RpOQA",
+        "https://youtu.be/SDhor2rHlzY",
+        "https://youtu.be/zgJ0DPe6Fqc"
+      ],
+      "帕斯":[
+        "https://youtu.be/7cRyQOl9YOc",
+        "https://youtu.be/NbwlVmH3S74",
+        "https://youtu.be/F9c_qE6mESs",
+        "https://youtu.be/kicJcLPFB7c",
+        "https://youtu.be/9MVtq44g01U",
+        "https://youtu.be/hQax3UIrAT8"
+      ],
+      "皮羅":[
+        "https://youtu.be/OEgDW0wpEAM",
+        "https://youtu.be/ZD5ftdAFq_Q",
+        "https://youtu.be/1k3UDlPgjPA",
+        "https://youtu.be/SAOhPNSst98",
+        "https://youtu.be/zkqtOzoPWOM",
+        "https://youtu.be/LjLQQefhIN8"
+      ],
+      "旅先森":[
+        "https://youtu.be/2EWjKIjkbs8",
+        "https://youtu.be/h3SUPNShbis",
+        "https://youtu.be/fy-QwsZBzoY",
+        "https://youtu.be/UqeLzsiwNSg",
+        "https://youtu.be/QSCzAZLmHFo",
+        "https://youtu.be/qWigREDVOCw"
+      ]
+    };
+    // normalize to objects with id/url
+    const videosPool = {};
+    Object.keys(videosPoolRaw).forEach(k=>{
+      videosPool[k] = (videosPoolRaw[k]||[]).map(u=> (typeof u==="string") ? ({id:ytIdFrom(u), url:u, reason:""}) : u);
+    });
+    // cache within the current session (avoid re-roll on re-render)
+    window._videoPickCache = window._videoPickCache || {};
+    const roleKey = roleForVideos || (meta && meta.role) || "";
+    let chosen = window._videoPickCache[roleKey];
+    if(!chosen){
+      chosen = pickRandom(videosPool[roleKey]||[], 2);
+      window._videoPickCache[roleKey] = chosen;
+    }
+    const vids = chosen;
+    const vidsEl = document.getElementById("videos"); vidsEl.innerHTML = "";
+    vids.forEach(v=>{
+      const el=document.createElement("div");
+      el.className="videoCard";
+      el.innerHTML = `<div class="videoReason">${v.reason||""}</div>
+                      <a class="videoThumb" href="${v.url}" target="_blank" rel="noopener" aria-label="播放影片">
+                        <img loading="lazy" src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="推薦影片縮圖">
+                      </a>`;
+      vidsEl.appendChild(el);
+    });
+  })();
+  // --- end videos ---
+const partnersByMBTI={ENFP:[{code:"ISTJ",why:"理性與秩序讓你的靈感更落地。"}, {code:"ENFJ",why:"情感共鳴，旅途故事感滿分。"}],
     ENTP:[{code:"ISTP",why:"行動與修理支援，創意不怕卡關。"}, {code:"ESFP",why:"現場靈感互拋，氣氛永不冷場。"}],
     ESTP:[{code:"INTJ",why:"策略規劃搭即興行動，一動一靜剛剛好。"}, {code:"ISFP",why:"你衝他穩，節奏被溫柔梳理。"}],
     INTJ:[{code:"ENFP",why:"靈感點燃你的藍圖，計畫更有生命力。"}, {code:"ISTP",why:"策略＋實作，硬核高效組合。"}],

@@ -577,7 +577,24 @@ function renderQuestion(){
     function __mk(n){ const a=Array.from({length:n},(_,i)=>i); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
     window.shuffleMap = qData.map(q => __mk((q.opts||[]).length));
   }
-qWrap.innerHTML=`<div class="qtitle">${clean(q.title)||''}</div>
+const intros = {
+      0: "你和朋友們計畫來一趟旅行，群組中如火如荼地討論行程。",
+      1: "經過漫長的行程討論、計畫後，你們終於要出發了。",
+      2: "問題一一解決，你終於趕上飛機，也順利起飛了。",
+      3: "好不容易處理完拿錯行李的問題，你們決定到附近街上逛逛，結果你不小心和旅伴走散了，手機又沒電。",
+      4: "你好不容易和旅伴會合了，你們一起搭車前往下個行程。",
+      6: "你們選了一家看起來氣氛很不錯的餐廳。",
+      7: "吃飽喝足後，你和旅伴走進一家藥妝店。",
+      8: "終於回到住宿，大家都累壞了。結果房間比想像中小，插座只有兩個，",
+      9: "深夜，大家都睡了。",
+      10: "幾天的旅程即將接近尾聲。結果旅伴突然對你說——"
+    };
+      (function(){try{
+        var qbody = qWrap.querySelector('.qbody');
+        var intro = intros[idx];
+        if(intro && qbody){ qbody.innerHTML = intro + '<br>' + qbody.innerHTML; }
+      }catch(e){}})();
+      qWrap.innerHTML=`<div class="qtitle">${clean(q.title)||''}</div>
                    <div class="qbody">${clean(q.body)||''}</div>`
     + ( (window.shuffleMap && window.shuffleMap[idx]) ? window.shuffleMap[idx] : (q.opts||[]).map((_,i)=>i) )
     .map((orig)=>{
@@ -617,6 +634,7 @@ qWrap.innerHTML=`<div class="qtitle">${clean(q.title)||''}</div>
           if(tail){
             b.classList.add('smalltext');
             b.textContent = (b.textContent ? (b.textContent + ' ') : '') + tail;
+            var __intro = intros[idx]; if(__intro){  b.innerHTML = __intro + '<br>' + b.innerHTML;  try{    var pre = __intro + '<br>';    var rest = b.innerHTML.slice(pre.length);    rest = rest.split(__intro).join('');    b.innerHTML = pre + rest;  }catch(_e){} }
           }
         }
       }

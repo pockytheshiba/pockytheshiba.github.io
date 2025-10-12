@@ -170,6 +170,22 @@
 .videoThumb:hover::before {
   transform: translate(-38%, -50%) scale(1.08);
 }
+
+/* PARTNERS mobile overflow fix: keep layout, enable horizontal scroll on small screens */
+@media (max-width: 540px){
+  .partners{
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    justify-content: flex-start; /* 避免被置中後左右裁切 */
+    padding-bottom: 6px; /* 預留可視滾動區域 */
+  }
+  .partner{
+    flex: 0 0 auto;         /* 保持卡片寬度，不被壓縮 */
+    scroll-snap-align: center;
+  }
+}
+
 </style>
 </head>
 <body>

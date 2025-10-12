@@ -1515,11 +1515,21 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 
 
 
+
 <script>
-// ==== Debug panel (shows when ?debug=1 / #debug / localStorage flag). Press Shift+D to toggle. ====
+// ==== Debug panel (shows when ?debug=1 / #debug / localStorage flag). Shift+D to toggle. ====
 (function(){
   try{
-    function wantDebug(){ return true; }
+    function wantDebug(){
+      var qs = location.search || '';
+      var hash = location.hash || '';
+      var usp = new URLSearchParams(qs);
+      if ((usp.get('debug')||'').toLowerCase()==='1') return true;
+      if (usp.has('debug') && (usp.get('debug')==='' || usp.get('debug')==='true')) return true;
+      if (/debug=1/i.test(hash) || /#debug/i.test(hash)) return true;
+      if (localStorage.getItem('tf_debug') === '1') return true;
+      return false;
+    }
     // Keyboard toggle: Shift + D
     window.addEventListener('keydown', function(e){
       if(e.shiftKey && (e.key==='D' || e.key==='d')){
@@ -1545,7 +1555,7 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
     panel.id = 'debugPanelTF';
     panel.setAttribute('style',
       'position:fixed;right:12px;bottom:12px;z-index:99999;'+
-      'width:min(92vw,560px);max-height:80vh;overflow:auto;'+
+      'width:min(92vw,620px);max-height:80vh;overflow:auto;'+
       'background:rgba(17,17,17,.88);color:#fff;padding:12px;border-radius:14px;'+
       'box-shadow:0 8px 30px rgba(0,0,0,.35);font-size:14px;line-height:1.4;'+
       'backdrop-filter:saturate(120%) blur(6px);'
@@ -1553,10 +1563,13 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
     panel.innerHTML = ''
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
       +   '<div style="font-weight:800;font-size:15px;">🔧 測試面板（僅 debug 模式顯示，不影響一般使用者）</div>'
-      +   '<button id="dbgClose" style="background:#444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;">關閉</button>'
+      +   '<div style="display:flex;gap:8px;align-items:center">'
+      +     '<span style="opacity:.7;font-size:12px">Shift+D 開關</span>'
+      +     '<button id="dbgClose" style="background:#444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;">關閉</button>'
+      +   '</div>'
       + '</div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
-      +   '<div><label style="opacity:.9">目標 MBTI</label><input id="dbgMbti" placeholder="例如 ESFP" maxlength="4" style="width:100%;padding:8px;border-radius:8px;border:1px solid #555;background:#222;color:#fff;"></div>'
+      +   '<div><label style="opacity:.9">目標 MBTI</label><input id="dbgMbti" placeholder="例如 ESFP / INTJ" maxlength="4" style="width:100%;padding:8px;border-radius:8px;border:1px solid #555;background:#222;color:#fff;"></div>'
       +   '<div><label style="opacity:.9">目標角色（可選）</label><select id="dbgRole" style="width:100%;padding:8px;border-radius:8px;border:1px solid #555;background:#222;color:#fff;">'
       +       '<option value="">（不指定）</option>'
       +       '<option>旅先森</option><option>帕斯</option><option>卡邦</option><option>卡美拉</option><option>皮羅</option>'
@@ -1565,6 +1578,7 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
       + '<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">'
       +   '<button id="dbgSuggest" style="background:#16a34a;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">產生建議</button>'
       +   '<button id="dbgApply" style="background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">立即套用並顯示結果</button>'
+      +   '<button id="dbgForce" style="background:#f59e0b;color:#111;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;">精準產生（鎖 MBTI/角色）</button>'
       +   '<button id="dbgCopy" style="background:#6b7280;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">複製建議</button>'
       + '</div>'
       + '<div id="dbgOut" style="background:#111;border:1px solid #333;border-radius:10px;padding:10px;white-space:pre-wrap;max-height:40vh;overflow:auto;"></div>';
@@ -1655,6 +1669,172 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
       return {picks:picks, wantRole:wantRole, wantMBTI:wantMBTI};
     }
 
+    // ---- precise "force" generator (lock MBTI/role) ----
+    (function attachForce(){
+      const Q = getG('qData') || getG('questions');
+      const A = getG('AXIS_KEY'); const M = getG('mapping');
+      if (!Q || !A || !M) return;
+      const roleOrder = ['帕斯','卡美拉','卡邦','旅先森','皮羅'];
+
+      function sumAxis(picks){
+        const acc = {E:0,I:0,N:0,S:0,T:0,F:0,J:0,P:0};
+        for (let i=0;i<Q.length;i++){
+          const v = (A['Q'+(i+1)]||[])[picks[i]] || {};
+          for (const k in v) acc[k] += v[k];
+        }
+        return acc;
+      }
+      function roleWinner(picks){
+        const rs = {'旅先森':0,'帕斯':0,'卡美拉':0,'卡邦':0,'皮羅':0};
+        for (let i=0;i<Q.length;i++){
+          const r = (M[i]||[])[picks[i]];
+          if (r) rs[r] = (rs[r]||0)+1;
+        }
+        const top = Math.max(...Object.values(rs));
+        let tied = Object.entries(rs).filter(([_,v])=>v===top).map(([k])=>k);
+        if (tied.length>1){
+          const late = {'旅先森':0,'帕斯':0,'卡美拉':0,'卡邦':0,'皮羅':0};
+          for (let i=6;i<12;i++){ const r=(M[i]||[])[picks[i]]; if(r) late[r]++; }
+          const lateTop = Math.max(...tied.map(r=>late[r]));
+          let lateT = tied.filter(r=>late[r]===lateTop);
+          if (lateT.length>1) lateT.sort((a,b)=>roleOrder.indexOf(a)-roleOrder.indexOf(b));
+          return lateT[0];
+        }
+        return tied[0];
+      }
+      function pickInit(mbti, wantRole){
+        const picks = [];
+        for (let i=0;i<Q.length;i++){
+          const row = A['Q'+(i+1)] || [];
+          let best=-1e9, b=0;
+          for (let o=0;o<row.length;o++){
+            const v = row[o] || {};
+            let sc = 0;
+            sc += mbti[0]==='E' ? (v.E||0)-(v.I||0) : (v.I||0)-(v.E||0);
+            sc += mbti[1]==='N' ? (v.N||0)-(v.S||0) : (v.S||0)-(v.N||0);
+            sc += mbti[2]==='T' ? (v.T||0)-(v.F||0) : (v.F||0)-(v.T||0);
+            sc += mbti[3]==='J' ? (v.J||0)-(v.P||0) : (v.P||0)-(v.J||0);
+            if (wantRole && i>=6 && i<=11 && (M[i]||[])[o]===wantRole) sc += 0.6;
+            if (sc>best){ best=sc; b=o; }
+          }
+          picks[i]=b;
+        }
+        return picks;
+      }
+      function flipAxisGreedy(picks, wantLetter, keepRole){
+        const pairs = {E:['E','I'], I:['I','E'], N:['N','S'], S:['S','N'], T:['T','F'], F:['F','T'], J:['J','P'], P:['P','J']};
+        const [pos,neg] = pairs[wantLetter];
+        let acc = sumAxis(picks);
+        const margin = ()=> (acc[pos]-acc[neg]);
+        if (margin()>0) return picks;
+
+        const cands = [];
+        for (let i=0;i<Q.length;i++){
+          const row = A['Q'+(i+1)] || [];
+          const cur = picks[i];
+          const curVotes = row[cur] || {};
+          const curRole = (M[i]||[])[cur];
+          for (let o=0;o<row.length;o++){
+            if (o===cur) continue;
+            const newRole = (M[i]||[])[o];
+            const roleCost = (keepRole && newRole!==curRole) ? 10 : 0;
+            const v = row[o] || {};
+            const d = ((v[pos]||0)-(v[neg]||0)) - ((curVotes[pos]||0)-(curVotes[neg]||0));
+            const otherPenalty =
+              Math.abs(((v.E||0)-(v.I||0)) - ((curVotes.E||0)-(curVotes.I||0))) +
+              Math.abs(((v.N||0)-(v.S||0)) - ((curVotes.N||0)-(curVotes.S||0))) +
+              Math.abs(((v.T||0)-(v.F||0)) - ((curVotes.T||0)-(curVotes.F||0))) +
+              Math.abs(((v.J||0)-(v.P||0)) - ((curVotes.J||0)-(curVotes.P||0))) - Math.abs(d);
+            const score = d - 0.2*otherPenalty - roleCost;
+            cands.push({i,o,score,curRole,newRole,delta:d});
+          }
+        }
+        cands.sort((a,b)=>b.score-a.score);
+
+        for (const c of cands){
+          if (margin()>0) break;
+          const i=c.i, o=c.o;
+          const row = A['Q'+(i+1)] || [];
+          const cur = picks[i];
+          const curV = row[cur] || {};
+          const newV = row[o] || {};
+          picks[i]=o;
+          for (const k in newV){ acc[k] = (acc[k]||0) + (newV[k]||0) - (curV[k]||0); }
+          if (keepRole){
+            const rw = roleWinner(picks);
+            if (rw !== keepRole){
+              picks[i]=cur;
+              for (const k in newV){ acc[k] = (acc[k]||0) - (newV[k]||0) + (curV[k]||0); }
+            }
+          }
+        }
+        return picks;
+      }
+
+      window.force = function({ mbti='INTJ', role='', apply=false } = {}){
+        mbti = (mbti||'').toUpperCase().trim();
+        if (!/^[EI][SN][TF][JP]$/.test(mbti)) { alert('MBTI 格式需為 4 碼，如 ESFP'); return; }
+        let picks = pickInit(mbti, role);
+
+        if (role){
+          for (let i=6;i<12;i++){
+            const cur = picks[i];
+            const row = A['Q'+(i+1)]||[];
+            if ((M[i]||[])[cur]!==role){
+              let best = cur, bestGain = -1e9;
+              for (let o=0;o<row.length;o++){
+                if ((M[i]||[])[o]===role){
+                  const v=row[o]||{}, u=row[cur]||{};
+                  const lose = Math.abs((v.E||0)-(v.I||0) - ((u.E||0)-(u.I||0))) +
+                               Math.abs((v.N||0)-(v.S||0) - ((u.N||0)-(u.S||0))) +
+                               Math.abs((v.T||0)-(v.F||0) - ((u.T||0)-(u.F||0))) +
+                               Math.abs((v.J||0)-(v.P||0) - ((u.J||0)-(u.P||0)));
+                  const gain = 100 - lose;
+                  if (gain>bestGain){ bestGain=gain; best=o; }
+                }
+              }
+              picks[i]=best;
+            }
+          }
+          let guard=50;
+          while (roleWinner(picks)!==role && guard--){
+            let changed=false;
+            outer: for (let i=0;i<Q.length;i++){
+              const cur = picks[i];
+              const row = A['Q'+(i+1)]||[];
+              for (let o=0;o<row.length;o++){
+                if ((M[i]||[])[o]===role){
+                  picks[i]=o;
+                  if (roleWinner(picks)===role){ changed=true; break outer; }
+                  picks[i]=cur;
+                }
+              }
+            }
+            if (!changed) break;
+          }
+        }
+
+        const want = {E:mbti[0], N:mbti[1], T:mbti[2], J:mbti[3]};
+        picks = flipAxisGreedy(picks, want.E, role||null);
+        picks = flipAxisGreedy(picks, want.N, role||null);
+        picks = flipAxisGreedy(picks, want.T, role||null);
+        picks = flipAxisGreedy(picks, want.J, role||null);
+
+        if (apply && getG('computeAndShow')){
+          setG('picks', picks.slice());
+          getG('computeAndShow')();
+        }
+
+        // return human readable list
+        const list = (getG('qData')||getG('questions')||[]).map((q,i)=>{
+          const t = (q.opts&&q.opts[picks[i]])?q.opts[picks[i]]:'';
+          return 'Q'+(i+1)+'  選 '+ABC(picks[i])+'：'+t;
+        });
+        return {picks, list};
+      };
+    })();
+
+    // Bind UI buttons
     document.getElementById('dbgSuggest').onclick = function(){ runSuggest(false); };
     document.getElementById('dbgApply').onclick   = function(){ runSuggest(true); };
     document.getElementById('dbgCopy').onclick    = function(){
@@ -1668,9 +1848,24 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
         document.body.removeChild(ta);
       }
     };
+    document.getElementById('dbgForce').onclick = function(){
+      var mbti = (document.getElementById('dbgMbti').value||'').toUpperCase().trim();
+      var role = document.getElementById('dbgRole').value || '';
+      if (!mbti && !role){ alert('請輸入 MBTI 或選角色'); return; }
+      if (mbti && !/^[EI][SN][TF][JP]$/.test(mbti)){ alert('MBTI 格式需為 4 碼，如 ESFP'); return; }
+      if (!window.force){ alert('force 尚未載入'); return; }
+      var out = document.getElementById('dbgOut');
+      var res = window.force({ mbti: mbti || undefined, role: role || undefined, apply: true });
+      var header = '（精準）已套用 → 目標角色：'+(role||'(未指定)')+'｜目標 MBTI：'+(mbti||'(未指定)')+'
+
+';
+      out.textContent = header + (res && res.list ? res.list.join('
+') : '(無法取得建議)');
+    };
   }catch(e){ console.error('[debug panel error]', e); }
 })();
 </script>
+
 
 
 

@@ -1459,5 +1459,62 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 
+
+<script>
+// === SHAREBLOCK: Make FB button default to COPY message + URL (only this button) ===
+(function(){
+  var btn = document.getElementById('shareFB');
+  if(!btn) return;
+  // remove any previous listeners by cloning
+  var clone = btn.cloneNode(true);
+  btn.parentNode.replaceChild(clone, btn);
+
+  function getPublicURL(){
+    var href = (location.href || '').split('#')[0];
+    if(/^https?:\/\//i.test(href)) return href;
+    return 'https://pockytheshiba.github.io/';
+  }
+
+  clone.addEventListener('click', function(ev){
+    try{
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      var titleEl = document.getElementById('title');
+      var titleTxt = (titleEl && titleEl.textContent) ? titleEl.textContent.trim() : 'Travel First｜小旅伴家族心理測驗';
+      var msg = '我的旅行人格是「' + titleTxt + '」！你是哪種小旅伴呢？適合和你一起旅行的小旅伴是誰呢？趕快來測試看看吧！';
+      var full = msg + '\\n' + getPublicURL();
+
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(full).then(function(){
+          alert('已複製到剪貼簿，打開 Facebook 貼上即可！');
+        }).catch(function(){
+          fallbackCopy(full);
+        });
+      }else{
+        fallbackCopy(full);
+      }
+
+      function fallbackCopy(text){
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand('copy');
+          alert('已複製到剪貼簿，打開 Facebook 貼上即可！');
+        } catch(e) {
+          alert('請手動複製以下內容：\\n\\n' + text);
+        }
+        document.body.removeChild(ta);
+      }
+    }catch(e){
+      console.error('[FB copy share]', e);
+    }
+  }, true);
+})();
+</script>
+
 </body>
 </html>

@@ -171,18 +171,19 @@
   transform: translate(-38%, -50%) scale(1.08);
 }
 
-/* PARTNERS mobile overflow fix: keep layout, enable horizontal scroll on small screens */
+/* PARTNERS mobile auto-scale (no scrolling, shrink into white card) */
 @media (max-width: 540px){
   .partners{
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    justify-content: flex-start; /* 避免被置中後左右裁切 */
-    padding-bottom: 6px; /* 預留可視滾動區域 */
+    /* 盡量不影響其他區塊，只做視覺縮放 */
+    transform: scale(0.88);
+    transform-origin: top center;
+    margin-left: auto;
+    margin-right: auto;
+    /* 非標準，但在行動版 Chrome/Android/iOS 普遍支援，會連同排版寬度一起縮 */
+    zoom: 0.88;
   }
   .partner{
-    flex: 0 0 auto;         /* 保持卡片寬度，不被壓縮 */
-    scroll-snap-align: center;
+    flex: 0 0 auto; /* 保持卡片比例，不被壓扁 */
   }
 }
 

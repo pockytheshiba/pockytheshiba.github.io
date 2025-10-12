@@ -187,6 +187,14 @@
   }
 }
 
+
+/* === SHAREBLOCK TITLE SIZE OVERRIDE (match h2) === */
+.shareBlock h3{
+  font-size: 24px !important; /* align with default h2 (~24px) */
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
 </style>
 </head>
 <body>
@@ -1067,5 +1075,61 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
   // If there is a "back to intro" flow in future, you can call showBanner();
 })();
 </script>
+
+<script>
+// === SHARE AREA PATCH: FB share + mobile export fix (scoped) ===
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  // (A) Facebook share: use modern endpoint + fallback
+  var fbBtn = $('shareFB');
+  if(fbBtn){
+    fbBtn.addEventListener('click', function(ev){
+      try{
+        ev.preventDefault(); ev.stopImmediatePropagation();
+        var url = location.href.split('#')[0];
+        var enc = encodeURIComponent(url);
+        var targets = [
+          'https://www.facebook.com/share.php?u=' + enc,
+          'https://www.facebook.com/sharer/sharer.php?u=' + enc
+        ];
+        var win = window.open(targets[0], '_blank', 'noopener');
+        if(!win || win.closed){
+          location.href = targets[0];
+        }
+      }catch(e){ console.error('[FB share]', e); }
+    }, true);
+  }
+
+  // (B) Export image (screenshot) on mobile: useCORS + iOS fallback to new tab
+  var exBtn = $('exportBtn');
+  if(exBtn && window.html2canvas){
+    exBtn.addEventListener('click', function(ev){
+      try{
+        ev.preventDefault(); ev.stopImmediatePropagation();
+        var area = document.querySelector('#result') || document.body;
+        html2canvas(area, {useCORS:true, backgroundColor:null, scale:2}).then(function(canvas){
+          var data = canvas.toDataURL('image/png');
+          // iOS Safari prefers opening a new tab instead of download
+          var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+          if(isIOS){
+            window.open(data, '_blank');
+          }else{
+            var a = document.createElement('a');
+            a.href = data;
+            a.download = 'TravelFirst_Result.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          }
+        }).catch(function(err){
+          console.error('[export image]', err);
+        });
+      }catch(e){ console.error('[export image]', e); }
+    }, true);
+  }
+})();
+</script>
+
 </body>
 </html>

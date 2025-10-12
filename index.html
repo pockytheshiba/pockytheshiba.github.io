@@ -194,7 +194,25 @@
   <div style="display:flex;flex-direction:column;align-items:center;text-align:center;color:#133D50">
     <div class="plane"></div>
     <div>初始化中，正在為你整理登機資訊…</div>
-  </div>
+  
+<script>
+// Overlay fallback: ensure it always hides even if other JS errors occur.
+// Does not touch any other logic.
+(function(){
+  function kill(){ try{ var el=document.getElementById('overlay'); if(el) el.classList.add('hide'); }catch(e){} }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(kill, 400); });
+  } else {
+    setTimeout(kill, 400);
+  }
+  // extra retries as insurance
+  setTimeout(kill, 2000);
+  setTimeout(kill, 5000);
+  window.addEventListener('error', kill, true);
+  window.addEventListener('unhandledrejection', kill, true);
+})();
+</script>
+</div>
 </div>
 
 <div class="container">

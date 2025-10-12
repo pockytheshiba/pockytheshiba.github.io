@@ -1519,16 +1519,7 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 // ==== Debug panel (shows when ?debug=1 / #debug / localStorage flag). Press Shift+D to toggle. ====
 (function(){
   try{
-    function wantDebug(){
-      var qs = location.search || '';
-      var hash = location.hash || '';
-      var usp = new URLSearchParams(qs);
-      if ((usp.get('debug')||'').toLowerCase()==='1') return true;
-      if (usp.has('debug') && (usp.get('debug')==='' || usp.get('debug')==='true')) return true;
-      if (/debug=1/i.test(hash) || /#debug/i.test(hash)) return true;
-      if (localStorage.getItem('tf_debug') === '1') return true;
-      return false;
-    }
+    function wantDebug(){ return true; }
     // Keyboard toggle: Shift + D
     window.addEventListener('keydown', function(e){
       if(e.shiftKey && (e.key==='D' || e.key==='d')){

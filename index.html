@@ -119,10 +119,10 @@
 
   /*CHAR_ANIM*/
   @keyframes popIn {
-    from { opacity: 0; transform: translateY(-10px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
   }
-  #charImg.pop-anim { animation: popIn 1.5s ease-out; }
+  #charImg.pop-anim { animation: popIn 480ms ease-out; }
 </style>
 </head>
 <body>
@@ -142,7 +142,7 @@
     <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
       那是一個清晨<br>機場的廣播正播放著熟悉的旋律
     </p>
-    <img src="https://static.wixstatic.com/media/ba9378_711cb17f8e79448f986feb435e2ddaab~mv2.png" alt="intro1" class="intro-img">
+    <img src="https://static.wixstatic.com/media/ba9378_c7658e27e63e455186ef53f5f51256ef~mv2.png" alt="intro1" class="intro-img">
 
     <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
       你拉著行李<br>抬頭望向出發大廳的航班螢幕<br>上面閃爍著一行奇妙的字樣
@@ -726,29 +726,29 @@ const resultImages = {
   "皮羅-INFP": "https://static.wixstatic.com/media/ba9378_5d0a4e8b84724615910db4e3a033770c~mv2.png",
 };
 
-const resultMeta={ENFP:{role:"旅先森",name:"靈魂探險家",desc:"熱血感性，憑直覺探索世界。",quote:"「世界這麼大，我想去轉一轉。」"},
-ENTP:{role:"旅先森",name:"創意行動者",desc:"靈光乍現，創意與行動並重。",quote:"「世界這麼大，我想去轉一轉。」"},
-ESTP:{role:"旅先森",name:"即興冒險家",desc:"行動派，熱愛速度與刺激。",quote:"「世界這麼大，我想去轉一轉。」"},
-INTJ:{role:"帕斯",name:"策略導演",desc:"腦中有藍圖、思路縝密。",quote:"「沒計畫的旅程不叫旅行，叫混亂。」"},
-ENTJ:{role:"帕斯",name:"決策領航員",desc:"領導氣場強，擅長掌控全局。",quote:"「沒計畫的旅程不叫旅行，叫混亂。」"},
-ISTJ:{role:"帕斯",name:"規劃執行者",desc:"有條理、重秩序、效率控。",quote:"「沒計畫的旅程不叫旅行，叫混亂。」"},
-ESTJ:{role:"帕斯",name:"領隊控制塔",desc:"行動派領導者，務實果斷。",quote:"「沒計畫的旅程不叫旅行，叫混亂。」"},
-ISFJ:{role:"卡邦",name:"貼心照顧者",desc:"細膩體貼，可靠又溫暖。",quote:"「沒關係，你儘管買！再重我都幫你扛！」"},
-ESFJ:{role:"卡邦",name:"社交暖心者",desc:"樂於照顧大家、營造溫度。",quote:"「沒關係，你儘管買！再重我都幫你扛！」"},
-INTP:{role:"卡邦",name:"分析修理師",desc:"喜歡研究、動手解決問題。",quote:"「沒關係，你儘管買！再重我都幫你扛！」"},
-ISTP:{role:"卡邦",name:"實作解決者",desc:"務實沉著、最會修東西的旅伴。",quote:"「沒關係，你儘管買！再重我都幫你扛！」"},
-ENFJ:{role:"卡美拉",name:"共感導演",desc:"溫柔熱情、情緒共鳴力強。",quote:"「哥拍的不是照片，是回憶。」"},
-ESFP:{role:"卡美拉",name:"現場氣氛王",desc:"活潑開朗，感性又有魅力。",quote:"「哥拍的不是照片，是回憶。」"},
-INFJ:{role:"卡美拉",name:"理想觀景者",desc:"安靜深情、觀察入微。",quote:"「哥拍的不是照片，是回憶。」"},
-ISFP:{role:"皮羅",name:"溫柔放空家",desc:"溫柔放鬆、重感受的旅人。",quote:"「休息，也是旅行的一部分。」"},
-INFP:{role:"皮羅",name:"夢想觀察家",desc:"內斂浪漫，旅行是心靈療癒。",quote:"「休息，也是旅行的一部分。」"}};
+const resultMeta={ENFP:{role:"旅先森",name:"靈魂探險家",desc:"對你來說，旅行是靈魂的燃料。你不喜歡照著行程走，總是被直覺牽引著走進未知的小巷，或臨時改變方向去追一場夕陽。你用好奇和熱情去探索世界，也感染著旅伴的心。對你而言，最美的風景不在地圖上，而在「下一個轉角」。",quote:""},
+ENTP:{role:"旅先森",name:"創意行動者",desc:"你是旅程中的靈感發電機，總能把突發狀況變成樂趣。車子拋錨？那就來場路邊野餐。迷路？那正好是發現新故事的開端。你的旅行節奏充滿驚喜與幽默，總讓人又崩潰又喜歡。對你來說，冒險就是最好的創意實驗室。",quote:""},
+ESTP:{role:"旅先森",name:"即興冒險家",desc:"你生來就是為了行動與體驗。跳傘、攀岩、夜市挑戰吃最辣的料理——你都樂在其中。你不追求完美，只追求「現在」。對你而言，旅行的價值不在於走了多少景點，而是有多少時刻讓心臟怦然一跳。",quote:""},
+INTJ:{role:"帕斯",name:"策略導演",desc:"你的旅行筆記像作戰藍圖，精準到連中途上廁所休息都預留時間。你享受掌控節奏與計畫被完美執行的滿足感。對你而言，旅行不是逃離日常，而是一場充滿策略的優雅征服——在秩序中感受自由，在規劃中找到浪漫。",quote:""},
+ENTJ:{role:"帕斯",name:"決策領航員",desc:"你是天生的行程指揮官。訂房、路線、票券全都井井有條，團隊遇到問題時第一個看向的就是你。你把旅行當成一場高效率的行動任務，卻也懂得在風景裡放慢腳步。因為你知道，掌控不是壓力，而是一種保護大家的方式。",quote:""},
+ISTJ:{role:"帕斯",name:"規劃執行者",desc:"你是那個會檢查每個人護照是否帶齊、確認出發時間、幫大家設定鬧鐘的人。雖然看似過於嚴謹，其實只是想讓一切順利進行。旅行對你來說，是讓世界有秩序地展開的一場安穩冒險。",quote:""},
+ESTJ:{role:"帕斯",name:"領隊控制塔",desc:"你是行程的穩定核心，清楚知道該什麼時候出發、哪裡最好拍照、何時該催大家上車。旅行有你在，就像有個行動管家。雖然偶爾被嫌太嚴肅，但沒有你，整趟旅程就會變得一團亂。",quote:""},
+ISFJ:{role:"卡邦",name:"貼心照顧者",desc:"你是團隊中的靈魂安撫者。會在大家口渴時遞上水、迷路時拿出地圖。你用細膩的關心讓旅行變得柔軟。即使自己累了，也會先確認大家有沒有吃飽。對你來說，最棒的旅程，不是風景多壯麗，而是有人同行。",quote:""},
+ESFJ:{role:"卡邦",name:"社交暖心者",desc:"你是氣氛營造王，總能讓團隊保持愉快。你會幫大家拍合照、記下有趣的插曲，確保每個人都有開心的回憶。旅行時，你像個溫暖的主持人，把每一個瞬間都變成值得分享的故事。",quote:""},
+INTP:{role:"卡邦",name:"分析修理師",desc:"別人遇到問題會慌，你只會冒出一句：「我來研究看看。」導航壞了、行李卡住、Wi-Fi連不上，你都能靠邏輯和冷靜找到解法。旅行對你而言，是一次次實驗與學習的過程——每一個麻煩，都是解謎的機會。",quote:""},
+ISTP:{role:"卡邦",name:"實作解決者",desc:"你不多話，卻總在關鍵時刻出手。行李輪壞了你能現場修好、行程延誤你能立刻找出替代方案。對你來說，旅行的樂趣在於動手和行動。你讓旅程少了慌亂、多了可靠感。",quote:""},
+ENFJ:{role:"卡美拉",name:"共感導演",desc:"你是旅行中最懂情緒的導演。你會替旅伴拍下最美的背影，也會默默察覺誰在悶悶不樂。你的旅行不只是看風景，更是連結人與人。你相信，回憶不是照片的像素，而是當下那份真實的心動。",quote:""},
+ESFP:{role:"卡美拉",name:"現場氣氛王",desc:"有你在，氣氛永遠不冷場。你能把迷路變成笑點，把等車變成派對。旅行對你來說，是舞台，而世界是你的觀眾。你用快樂感染別人，也用真誠讓每一段旅程閃閃發光。",quote:""},
+INFJ:{role:"卡美拉",name:"理想觀景者",desc:"你旅行時總帶著觀察與思考的眼睛。你在意的不只是風景，而是它背後的故事。對你來說，一次旅程不僅是移動，更是與世界對話的過程。那些小小的巧合與遇見，都會變成你靈魂裡的一部分。",quote:""},
+ISFP:{role:"皮羅",name:"溫柔放空家",desc:"你喜歡在旅行中慢下來，坐在咖啡廳裡看人群，或安靜散步在巷弄間。你不追求完美的計畫，只想在節奏裡找到自在。對你而言，旅行最美的部分，是那份無所事事的心安。",quote:""},
+INFP:{role:"皮羅",name:"夢想觀察家",desc:"你總能在旅途中找到詩意——無論是一句陌生人的問候，還是一片被風吹動的樹影。你用情感記錄世界，用想像延續回憶。旅行對你來說，不只是離開，而是一場與自己重逢的旅程。",quote:""}};
 
 function showResult(role,roleForVideos,mbti){
   const mainImg=document.getElementById("charImg");
   const meta=resultMeta[mbti];
   document.getElementById("title").textContent=`${meta.role} × ${mbti}｜${meta.name}`;
   document.getElementById("subtitle").textContent=meta.desc;
-  document.getElementById("quote").textContent=meta.quote;
+  document.getElementById("quote").textContent="";
   const key = `${meta.role}-${mbti}`;
   mainImg.src = resultImages[key] || (roleImg[meta.role]||"");
   try{ mainImg.classList.remove('pop-anim'); void mainImg.offsetWidth; mainImg.classList.add('pop-anim'); }catch(_e){}

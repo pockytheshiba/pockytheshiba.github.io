@@ -230,7 +230,7 @@
 <div class="container">
   
 <div id="topBanner" style="text-align:center; padding:8px 0;">
-  <img src="https://static.wixstatic.com/media/ba9378_ab27a556851549cc94b0a0b36abc861a~mv2.png" alt="banner" style="width:80%; max-width:80%; height:auto; display:inline-block;">
+  <img src="https://static.wixstatic.com/media/ba9378_442c40fe7d274aef83d6339c68dc2ad5~mv2.png" alt="banner" style="width:80%; max-width:80%; height:auto; display:inline-block;">
 </div>
 <div class="card" id="intro">
     <p style="text-align:center; font-family:'Noto Sans TC',sans-serif; font-size:1.1em; line-height:1.8;">
@@ -374,7 +374,7 @@ const questions = [
     opts: [
       '冷靜地說：「我打去機場行李中心問問看。」',
       '盯著行李箱若有所思地說：「也許這是一場命運的錯置，一段異國的故事就此展開。」',
-      '一邊安撫旅伴、一邊說：「沒事啦～我等等拿去櫃檯處理，大家先別亂動喔。」',
+      '一邊安撫旅伴、一邊說：「沒事啦～我等等拿去飯店櫃檯請求協助，大家先別亂動喔。」',
       '「算了，先去吃頓飯再想吧，肚子餓也想不出來。」',
       '目光閃爍：「…要不要打開來看看？說不定是任務道具！」'
     ]},
@@ -410,8 +410,8 @@ const questions = [
     opts: [
       '馬上冷靜道歉並試圖重新點餐',
       '慌張地比手畫腳：「哈哈…我只是想說這道菜很好吃啦～！」',
-      '馬上鞠躬打圓場：「對不起對不起！」還順手幫店員擦桌子想挽回氣氛。',
-      '把比較會處理的旅伴推給店員，然後慢慢往廁所方向走，假裝要洗手避開現場。',
+      '把比較會處理的旅伴推給店員解決問題',
+      '覺得尷尬到爆，先假裝要去上廁所好了',
       '一邊道歉一邊笑：「沒關係啦～這下有故事可以回去講了。」'
     ]},
   { title: 'Q8｜吃飽喝足後，你和旅伴走進一家藥妝店。',
@@ -428,7 +428,7 @@ const questions = [
     opts: [
       '坐在角落拿出手機，趁這段時間確認明天的路線與行程。',
       '拿著相機趴在窗邊，拍下異國城市的夜景，順便整理今天的照片。',
-      '幫大家把行李整理出走道、幫忙收衣服：「大家先休息，我來處理就好～」',
+      '將大家的行李箱排好，空出一個走道，方便大家通行，並且分配插座',
       '直接撲上床、秒睡。',
       '覺得意猶未盡，打算等等再出門晃晃，體驗這座城市的夜生活。'
     ]},
@@ -446,7 +446,7 @@ const questions = [
     opts: [
       '打開你手機中這幾天計的帳說：「好，那我也重新核對一下每一筆花費。」',
       '撒嬌地說：「吼唷～你就當作是請我的啦～」',
-      '一邊苦笑一邊想：「……好啦，我就當這43元是友情稅。」',
+      '一邊苦笑一邊想：「……好啦，我就當這43元是友情稅。」回去就默默疏遠這個人',
       '裝傻，顧左右而言他。',
       '打哈哈地說：「好啦～我下次請你一杯珍奶，這樣扯平了吧～」'
     ]},
@@ -1511,6 +1511,157 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
   }, true);
 })();
 </script>
+
+
+
+<script>
+// ==== Debug panel (only shows when ?debug=1) — non-intrusive ====
+(function(){
+  try{
+    var usp = new URLSearchParams(location.search);
+    if(usp.get('debug') !== '1') return; // opt-in only
+
+    // Helper to access top-level const/let via eval (not on window)
+    function getG(name){
+      try { return (0,eval)(name); } catch(e){ return undefined; }
+    }
+    function setG(name, value){
+      try { (0,eval)(name + " = value"); }
+      catch(e){ try{ window[name] = value; }catch(_){} }
+    }
+
+    // Build panel
+    var panel = document.createElement('div');
+    panel.id = 'debugPanelTF';
+    panel.setAttribute('style',
+      'position:fixed;right:12px;bottom:12px;z-index:99999;'+
+      'width:min(92vw,560px);max-height:80vh;overflow:auto;'+
+      'background:rgba(17,17,17,.88);color:#fff;padding:12px;border-radius:14px;'+
+      'box-shadow:0 8px 30px rgba(0,0,0,.35);font-size:14px;line-height:1.4;'+
+      'backdrop-filter:saturate(120%) blur(6px);'
+    );
+    panel.innerHTML = ''
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+      +   '<div style="font-weight:800;font-size:15px;">🔧 測試面板（僅 debug=1 顯示，不影響一般使用者）</div>'
+      +   '<button id="dbgClose" style="background:#444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;">關閉</button>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
+      +   '<div><label style="opacity:.9">目標 MBTI</label><input id="dbgMbti" placeholder="例如 ESFP" maxlength="4" style="width:100%;padding:8px;border-radius:8px;border:1px solid #555;background:#222;color:#fff;"></div>'
+      +   '<div><label style="opacity:.9">目標角色（可選）</label><select id="dbgRole" style="width:100%;padding:8px;border-radius:8px;border:1px solid #555;background:#222;color:#fff;">'
+      +       '<option value="">（不指定）</option>'
+      +       '<option>旅先森</option><option>帕斯</option><option>卡邦</option><option>卡美拉</option><option>皮羅</option>'
+      +     '</select></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">'
+      +   '<button id="dbgSuggest" style="background:#16a34a;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">產生建議</button>'
+      +   '<button id="dbgApply" style="background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">立即套用並顯示結果</button>'
+      +   '<button id="dbgCopy" style="background:#6b7280;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">複製建議</button>'
+      + '</div>'
+      + '<div id="dbgOut" style="background:#111;border:1px solid #333;border-radius:10px;padding:10px;white-space:pre-wrap;max-height:40vh;overflow:auto;"></div>';
+
+    document.body.appendChild(panel);
+    document.getElementById('dbgClose').onclick = function(){ panel.remove(); };
+
+    function hasEnv(){
+      var Q = getG('qData') || getG('questions');
+      if(!Q) return '找不到題庫（qData/questions）';
+      if(!getG('AXIS_KEY')) return '找不到 AXIS_KEY';
+      if(!getG('mapping')) return '找不到 mapping';
+      if(!getG('computeAndShow')) return '找不到 computeAndShow()';
+      return '';
+    }
+
+    function ABC(i){ return "ABCDE".charAt(i) || String(i); }
+    function roleMap(){
+      var rm = getG('role2mbti') || {};
+      var m2r = {};
+      Object.keys(rm).forEach(function(r){
+        (rm[r]||[]).forEach(function(t){ m2r[t]=r; });
+      });
+      return { rm: rm, m2r: m2r };
+    }
+    function sign(pos,neg,axis,want){
+      var d = (axis[pos]||0) - (axis[neg]||0);
+      return (want===pos)? d : -d;
+    }
+    function bestPickFor(mbti,wantRole,i){
+      var A = getG('AXIS_KEY') || {};
+      var MAP = getG('mapping') || [];
+      var votes = A['Q'+(i+1)] || [];
+      var mapRow = MAP[i] || [];
+      var best = {opt:0,score:-1e9};
+      for(var opt=0; opt<votes.length; opt++){
+        var a = votes[opt] || {};
+        var s = 0;
+        s += sign('E','I',a, mbti[0]);
+        s += sign('S','N',a, mbti[1]);
+        s += sign('T','F',a, mbti[2]);
+        s += sign('J','P',a, mbti[3]);
+        if(wantRole && mapRow[opt]===wantRole) s += 0.30;
+        if(i>=6 && i<=11 && wantRole && mapRow[opt]===wantRole) s += 0.35;
+        if(s>best.score) best = {opt:opt, score:s};
+      }
+      return best.opt;
+    }
+
+    function runSuggest(apply){
+      var err = hasEnv();
+      var out = document.getElementById('dbgOut');
+      if(err){ out.textContent = '⚠️ ' + err; return; }
+
+      var mbti = (document.getElementById('dbgMbti').value||'').toUpperCase().trim();
+      var role = document.getElementById('dbgRole').value || '';
+      if(!mbti && !role){ out.textContent='請輸入 MBTI 或選角色（擇一即可）。'; return; }
+      if(mbti && !/^[EI][SN][TF][JP]$/.test(mbti)){ out.textContent='MBTI 格式需為 4 碼，如 ESFP'; return; }
+
+      var maps = roleMap();
+      var wantRole = role || (mbti ? maps.m2r[mbti] : '');
+      var wantMBTI = mbti || (role ? ((maps.rm[role]||[])[0]||'') : '');
+      if(!wantMBTI){ out.textContent='無法推得目標 MBTI，請至少提供一項條件。'; return; }
+
+      var Q = getG('qData') || getG('questions') || [];
+      var picks = [];
+      for(var i=0;i<Q.length;i++){ picks[i] = bestPickFor(wantMBTI,wantRole,i); }
+
+      var rows = [];
+      for(var i=0;i<Q.length;i++){
+        var q = Q[i] || {};
+        var txt = (q.opts && q.opts[picks[i]]) ? q.opts[picks[i]] : '(無法取得文字)';
+        rows.push('Q'+(i+1)+'  選 '+ABC(picks[i])+'：'+txt);
+      }
+      out.textContent = '目標角色：'+(wantRole||'(未指定)')+'｜目標 MBTI：'+wantMBTI+'
+
+' + rows.join('
+');
+
+      if(apply && getG('computeAndShow')){
+        setG('picks', picks.slice());
+        getG('computeAndShow')();
+        var title = (document.getElementById('title')||{}).textContent || '';
+        out.textContent += '
+
+👉 已套用並顯示結果：' + title.trim();
+      }
+      return {picks:picks, wantRole:wantRole, wantMBTI:wantMBTI};
+    }
+
+    document.getElementById('dbgSuggest').onclick = function(){ runSuggest(false); };
+    document.getElementById('dbgApply').onclick   = function(){ runSuggest(true); };
+    document.getElementById('dbgCopy').onclick    = function(){
+      var txt = document.getElementById('dbgOut').textContent || '';
+      if(!txt){ txt='（尚未產生建議）'; }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){ alert('已複製建議'); });
+      }else{
+        var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
+        ta.select(); try{ document.execCommand('copy'); alert('已複製建議'); }catch(e){ alert('請手動複製'); }
+        document.body.removeChild(ta);
+      }
+    };
+  }catch(e){ console.error('[debug panel error]', e); }
+})();
+</script>
+
 
 </body>
 </html>

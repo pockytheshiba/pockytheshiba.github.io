@@ -1514,12 +1514,31 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 
 
 
+
 <script>
-// ==== Debug panel (only shows when ?debug=1) — non-intrusive ====
+// ==== Debug panel (shows when ?debug=1 / #debug / localStorage flag). Press Shift+D to toggle. ====
 (function(){
   try{
-    var usp = new URLSearchParams(location.search);
-    if(usp.get('debug') !== '1') return; // opt-in only
+    function wantDebug(){
+      var qs = location.search || '';
+      var hash = location.hash || '';
+      var usp = new URLSearchParams(qs);
+      if ((usp.get('debug')||'').toLowerCase()==='1') return true;
+      if (usp.has('debug') && (usp.get('debug')==='' || usp.get('debug')==='true')) return true;
+      if (/debug=1/i.test(hash) || /#debug/i.test(hash)) return true;
+      if (localStorage.getItem('tf_debug') === '1') return true;
+      return false;
+    }
+    // Keyboard toggle: Shift + D
+    window.addEventListener('keydown', function(e){
+      if(e.shiftKey && (e.key==='D' || e.key==='d')){
+        var cur = localStorage.getItem('tf_debug') === '1';
+        localStorage.setItem('tf_debug', cur ? '0' : '1');
+        location.reload();
+      }
+    }, {once:false});
+
+    if(!wantDebug()) return; // opt-in only
 
     // Helper to access top-level const/let via eval (not on window)
     function getG(name){
@@ -1542,7 +1561,7 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
     );
     panel.innerHTML = ''
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-      +   '<div style="font-weight:800;font-size:15px;">🔧 測試面板（僅 debug=1 顯示，不影響一般使用者）</div>'
+      +   '<div style="font-weight:800;font-size:15px;">🔧 測試面板（僅 debug 模式顯示，不影響一般使用者）</div>'
       +   '<button id="dbgClose" style="background:#444;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;">關閉</button>'
       + '</div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
@@ -1661,6 +1680,7 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
   }catch(e){ console.error('[debug panel error]', e); }
 })();
 </script>
+
 
 
 </body>

@@ -116,6 +116,13 @@
     margin-top: 0 !important; /* rely on image bottom margin to create spacing */
   }
 
+
+  /*CHAR_ANIM*/
+  @keyframes popIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+  }
+  #charImg.pop-anim { animation: popIn 480ms ease-out; }
 </style>
 </head>
 <body>
@@ -744,6 +751,7 @@ function showResult(role,roleForVideos,mbti){
   document.getElementById("quote").textContent=meta.quote;
   const key = `${meta.role}-${mbti}`;
   mainImg.src = resultImages[key] || (roleImg[meta.role]||"");
+  try{ mainImg.classList.remove('pop-anim'); void mainImg.offsetWidth; mainImg.classList.add('pop-anim'); }catch(_e){}
   mainImg.style.border="none"; mainImg.style.background="transparent";
 
   const videosMap={"旅先森":[{id:"2EWjKIjkbs8",url:"https://youtu.be/2EWjKIjkbs8",reason:"東京夜生活去哪裡？這邊絕對可以大開你的眼界"},
@@ -803,7 +811,7 @@ function showResult(role,roleForVideos,mbti){
   window.addEventListener('resize', resizePartners);
 
   var hi=document.getElementById("heroImg"); if(hi){ hi.style.display="flex"; } document.getElementById("result").classList.add("show");
-  window.scrollTo({top:result.offsetTop-8,behavior:'smooth'});
+  window.scrollTo(0, 0);
 }
 
 function resizePartners(){

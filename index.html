@@ -312,7 +312,9 @@
       <div class="partners" id="partners"></div>
     </div>
     <div class="center" style="margin-top:12px">
-      <button class="btn secondary" id="shareGiveawayBtn" style="background:#e02424;color:#fff;border:0">分享結果參加抽獎</button>
+      <button class="btn secondary" id="shareGiveawayBtn" style="background:#e02424;color:#fff;border:0">分享結果參加抽獎</button><a class="btn" id="ytBtn" href="https://www.youtube.com/c/TRAVELFIRST" target="_blank" rel="noopener" style="margin-left:10px; display:inline-flex; align-items:center; gap:6px;">
+  <span>觀看旅行優先</span><img src="https://static.wixstatic.com/media/ba9378_38c1d3e665ef460fba9b4339ae00a233~mv2.png" alt="" style="height:1.1em; width:auto; vertical-align:middle;">
+</a>
     </div>
 
     
@@ -335,10 +337,7 @@
     </div>
 
     <div class="center" style="margin-top:18px">
-      <div class="promo">
-        <strong>我們是 旅行優先 TRAVEL FIRST —— 帶著小旅伴，一起旅行！</strong>
-        <a class="btn" id="ytBtn" href="https://www.youtube.com/c/TRAVELFIRST" target="_blank" rel="noopener">馬上觀看旅行優先頻道</a>
-      </div>
+      <div class="promo"></div>
     </div>
   </div>
 
@@ -1655,35 +1654,37 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 
 
 <script>
-// === Giveaway Share (delegated): copies same text as FB share (shareText()), then show custom alert ===
+/*GIVEAWAY_DELEGATED_V1*/
 (function(){
   function fallbackCopy(text){
-    try{
+    try{ 
       var ta=document.createElement('textarea');
       ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px';
       document.body.appendChild(ta); ta.focus(); ta.select();
       document.execCommand('copy');
-    }catch(e){ console.error('[giveaway copy fallback]', e); }
+      document.body.removeChild(ta);
+      return true;
+    }catch(e){ console.error('[giveaway copy fallback]', e); return false; }
   }
   document.addEventListener('click', function(ev){
-    var btn = ev.target && (ev.target.id==='shareGiveawayBtn' ? ev.target : ev.target.closest && ev.target.closest('#shareGiveawayBtn'));
+    var t = ev.target;
+    if(!t) return;
+    var btn = (t.id==='shareGiveawayBtn') ? t : (t.closest ? t.closest('#shareGiveawayBtn') : null);
     if(!btn) return;
     ev.preventDefault(); ev.stopImmediatePropagation();
     try{
       var text = (typeof shareText==='function') ? shareText() : (function(){
-        var t = (document.getElementById('title')||{}).textContent || '';
+        var titleEl = document.getElementById('title');
+        var t = titleEl && titleEl.textContent ? titleEl.textContent.trim() : '';
         var u = (typeof shareUrl!=='undefined') ? shareUrl : (location.href||'').split('#')[0];
         return '我的旅行人格是「'+ t +'」！你是哪種小旅伴呢？適合和你一起旅行的小旅伴是誰呢？趕快來測試看看吧！ ' + u;
       })();
+      var done = false;
       if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(text).then(function(){
-          alert('已複製到剪貼簿，請至抽獎貼文下方貼上留言，並且@兩位你想一起旅行的朋友');
-        }).catch(function(){
-          fallbackCopy(text);
-          alert('已複製到剪貼簿，請至抽獎貼文下方貼上留言，並且@兩位你想一起旅行的朋友');
-        });
+        navigator.clipboard.writeText(text).then(function(){ done = true; alert('已複製到剪貼簿，請至抽獎貼文下方貼上留言，並且@兩位你想一起旅行的朋友'); })
+        .catch(function(){ done = fallbackCopy(text); alert('已複製到剪貼簿，請至抽獎貼文下方貼上留言，並且@兩位你想一起旅行的朋友'); });
       }else{
-        fallbackCopy(text);
+        done = fallbackCopy(text);
         alert('已複製到剪貼簿，請至抽獎貼文下方貼上留言，並且@兩位你想一起旅行的朋友');
       }
     }catch(e){

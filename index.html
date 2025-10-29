@@ -1584,6 +1584,22 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
   @media (max-width:480px){
     .tf-gw-btn,.tf-gw-item{ width:52px; height:52px; }
   }
+
+/* === GW: keep main gift visible; upward fan menu === */
+.tf-gw-wrap{ position:fixed; z-index:99999; }
+.tf-gw-wrap .tf-gw-btn{ opacity:1; visibility:visible; }
+.tf-gw-wrap.open .tf-gw-btn{ opacity:1; visibility:visible; } /* keep visible when open */
+
+/* layout: stack items upward from main button */
+.tf-gw-wrap .tf-gw-menu{ position:relative; width:56px; height:0; }
+.tf-gw-wrap .tf-gw-item{ position:absolute; left:0; bottom:0; transform: translateY(0) scale(.9); opacity:0; pointer-events:none; transition: transform .28s ease, opacity .18s ease; }
+.tf-gw-wrap.open .tf-gw-item{ opacity:1; pointer-events:auto; }
+.tf-gw-wrap .tf-gw-item[style*="--i:1"]{ transform: translateY(calc(-1 * var(--tf-gw-gap, 62px))) scale(.98); }
+.tf-gw-wrap .tf-gw-item[style*="--i:2"]{ transform: translateY(calc(-2 * var(--tf-gw-gap, 62px))) scale(.98); }
+.tf-gw-wrap .tf-gw-item[style*="--i:3"]{ transform: translateY(calc(-3 * var(--tf-gw-gap, 62px))) scale(.98); }
+
+/* closed state resets */
+.tf-gw-wrap:not(.open) .tf-gw-item{ transform: translateY(0) scale(.9); opacity:0; pointer-events:none; }
 </style>
 
 <div class="tf-gw-wrap tf-gw-hide" id="tf-gw">
@@ -1593,13 +1609,7 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
       <img class="tf-gw__img tf-gw__img--main" alt="" src="https://static.wixstatic.com/media/ba9378_fc3f770d907d4e57aca99437e053e6f4~mv2.png">
     </span>
     <span class="tf-gw__bubble" role="status"><span class="tf-gw__bubble-line1">抽獎活動</span></span>
-  </button>
-
-  
-  <a class="tf-gw-item tf-gw-item--ig" href="https://www.instagram.com/p/DPlwGR7E-iL/" target="_blank" rel="noopener" aria-label="前往 Instagram 抽獎貼文">
-    <img class="tf-gw__img" src="https://static.wixstatic.com/media/ba9378_8b2dfd925ddc48f49794a5e73ff46229~mv2.png" alt="" />
-  </a>
-<!-- 平台子鈕 -->
+  </button><!-- 平台子鈕 -->
   <div class="tf-gw-menu" aria-hidden="true">
     <a class="tf-gw-item" style="--i:1" data-label="Facebook 抽獎"
        href="https://www.facebook.com/share/p/1BUufWXvEx/" target="_blank" rel="noopener" aria-label="Facebook 抽獎">
@@ -1615,7 +1625,13 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
         <img class="tf-gw__img" alt="" src="https://static.wixstatic.com/media/ba9378_f9324c48806b40e19c0ba8a6f1522b55~mv2.png">
       </span>
     </a>
-  </div>
+  
+
+  
+  <a style="--i:3" class="tf-gw-item tf-gw-item--ig" href="https://www.instagram.com/p/DPlwGR7E-iL/" target="_blank" rel="noopener" aria-label="前往 Instagram 抽獎貼文">
+    <img class="tf-gw__img" src="https://static.wixstatic.com/media/ba9378_8b2dfd925ddc48f49794a5e73ff46229~mv2.png" alt="" />
+  </a>
+</div>
 </div>
 
 <script>
@@ -1709,6 +1725,42 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
       console.error('[giveaway share]', e);
       alert('無法複製內容，請手動複製貼上至抽獎貼文。');
     }
+  }, true);
+})();
+</script>
+
+
+<script>
+// === GW toggle: keep gift visible; open upward; click outside to close ===
+(function(){
+  var wrap = document.getElementById('tf-gw');
+  if(!wrap){ return; }
+  var main = wrap.querySelector('.tf-gw-btn');
+  function open(){ wrap.classList.add('open'); }
+  function close(){ wrap.classList.remove('open'); }
+  function toggle(){ wrap.classList.toggle('open'); }
+
+  // Ensure existing handlers don't hide the main button
+  if(main){
+    // Clear inline onclick that might replace/hide
+    try{ main.removeAttribute('onclick'); }catch(e){}
+    main.addEventListener('click', function(ev){
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      toggle();
+    }, true);
+  }
+
+  // Click outside to close
+  document.addEventListener('click', function(ev){
+    if(!wrap.classList.contains('open')) return;
+    var t = ev.target;
+    var inside = wrap.contains(t);
+    if(!inside){ close(); }
+  }, true);
+
+  // Escape key closes
+  document.addEventListener('keydown', function(ev){
+    if(ev.key === 'Escape'){ close(); }
   }, true);
 })();
 </script>

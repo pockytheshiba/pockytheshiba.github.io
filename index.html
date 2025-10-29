@@ -1773,5 +1773,37 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 
+
+<script>
+/*NEXT_LABEL_PATCH*/
+(function(){
+  try{
+    function updateNextLabel(){
+      try{
+        var btn = document.getElementById('nextBtn');
+        if(!btn) return;
+        if(typeof idx==='undefined' || typeof qData==='undefined'){ return; }
+        btn.textContent = (idx >= (qData.length - 1)) ? '觀看結果' : '下一題';
+      }catch(e){}
+    }
+    // Wrap renderQuestion to refresh label after each render
+    if(typeof window.renderQuestion === 'function'){
+      var __rq = window.renderQuestion;
+      window.renderQuestion = function(){
+        var ret = __rq.apply(this, arguments);
+        updateNextLabel();
+        return ret;
+      };
+    }
+    // Also update once after DOM is ready (in case already on a question)
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', updateNextLabel);
+    }else{
+      updateNextLabel();
+    }
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>

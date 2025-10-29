@@ -200,6 +200,20 @@
 #exportBtn{ display:none !important; }
 
 </style>
+
+<style>
+/* === Responsive: keep giveaway + YouTube buttons on one row === */
+#shareRow{ flex-wrap: nowrap; }
+#shareRow .btn{ white-space: nowrap; }
+@media (max-width: 480px){
+  #shareRow .btn{ font-size:14px; padding:10px 12px; border-radius:12px; }
+  #shareRow #ytBtn img{ height:1em; width:auto; }
+}
+@media (max-width: 360px){
+  #shareRow .btn{ font-size:13px; padding:8px 10px; }
+}
+</style>
+
 </head>
 <body>
 <div id="overlay" class="overlay">
@@ -311,7 +325,7 @@
       <h2 id="partnersTitle" style="margin:16px 0 8px">你適合一起旅行的旅伴</h2>
       <div class="partners" id="partners"></div>
     </div>
-    <div class="center" style="margin-top:12px">
+    <div class="center" id="shareRow" style="margin-top:12px">
       <button class="btn secondary" id="shareGiveawayBtn" style="background:#e02424;color:#fff;border:0">分享結果參加抽獎</button><a class="btn" id="ytBtn" href="https://www.youtube.com/c/TRAVELFIRST" target="_blank" rel="noopener" style="margin-left:10px; display:inline-flex; align-items:center; gap:6px;">
   <span>觀看旅行優先</span><img src="https://static.wixstatic.com/media/ba9378_38c1d3e665ef460fba9b4339ae00a233~mv2.png" alt="" style="height:1.1em; width:auto; vertical-align:middle;">
 </a>

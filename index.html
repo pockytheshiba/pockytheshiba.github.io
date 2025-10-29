@@ -311,6 +311,11 @@
       <h2 id="partnersTitle" style="margin:16px 0 8px">你適合一起旅行的旅伴</h2>
       <div class="partners" id="partners"></div>
     </div>
+    <div class="center" style="margin-top:12px">
+      <button class="btn secondary" id="shareGiveawayBtn" style="background:#e02424;color:#fff;border:0">分享結果參加抽獎</button>
+    </div>
+
+    
 
     <div class="shareBlock"><h3>將結果分享至：</h3><div class="shareRow"><div class="shareRow"><button class="iconBtn" id="shareLine" aria-label="Share to LINE"><img src="https://static.wixstatic.com/media/ba9378_76e7805d6e5a47f9b75b99d452aa89ba~mv2.png" alt="LINE" /></button><button class="iconBtn" id="shareFB" aria-label="Share to Facebook"><img src="https://static.wixstatic.com/media/ba9378_3bc563ef22974bd4adb473284cc8ca1a~mv2.png" alt="Facebook" /></button><button class="iconBtn" id="shareThreads" aria-label="Share to Threads"><img src="https://static.wixstatic.com/media/ba9378_f4fc9178433844e99014caf2d63bfe8e~mv2.png" alt="Threads" /></button><button class="iconBtn" id="exportBtn" aria-label="Export Image"><img src="https://static.wixstatic.com/media/ba9378_19383ab5b1ff4165915f6b0c4a358d8d~mv2.png" alt="匯出圖片" /></button></div></div></div>
 <!-- Mobile Share Sheet (only for FB) -->
@@ -1647,6 +1652,47 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 <!-- === /Giveaway Speed Dial === -->
+
+
+<script>
+// === Giveaway Share (delegated): copies same text as FB share (shareText()), then show custom alert ===
+(function(){
+  function fallbackCopy(text){
+    try{
+      var ta=document.createElement('textarea');
+      ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy');
+    }catch(e){ console.error('[giveaway copy fallback]', e); }
+  }
+  document.addEventListener('click', function(ev){
+    var btn = ev.target && (ev.target.id==='shareGiveawayBtn' ? ev.target : ev.target.closest && ev.target.closest('#shareGiveawayBtn'));
+    if(!btn) return;
+    ev.preventDefault(); ev.stopImmediatePropagation();
+    try{
+      var text = (typeof shareText==='function') ? shareText() : (function(){
+        var t = (document.getElementById('title')||{}).textContent || '';
+        var u = (typeof shareUrl!=='undefined') ? shareUrl : (location.href||'').split('#')[0];
+        return '我的旅行人格是「'+ t +'」！你是哪種小旅伴呢？適合和你一起旅行的小旅伴是誰呢？趕快來測試看看吧！ ' + u;
+      })();
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){
+          alert('已複製到剪貼簿，請至抽獎貼文下方貼上留言，並且@兩位你想一起旅行的朋友');
+        }).catch(function(){
+          fallbackCopy(text);
+          alert('已複製到剪貼簿，請至抽獎貼文下方貼上留言，並且@兩位你想一起旅行的朋友');
+        });
+      }else{
+        fallbackCopy(text);
+        alert('已複製到剪貼簿，請至抽獎貼文下方貼上留言，並且@兩位你想一起旅行的朋友');
+      }
+    }catch(e){
+      console.error('[giveaway share]', e);
+      alert('無法複製內容，請手動複製貼上至抽獎貼文。');
+    }
+  }, true);
+})();
+</script>
 
 </body>
 </html>

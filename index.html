@@ -338,6 +338,13 @@
   <span>觀看旅行優先</span><img src="https://static.wixstatic.com/media/ba9378_38c1d3e665ef460fba9b4339ae00a233~mv2.png" alt="" style="height:1.1em; width:auto; vertical-align:middle;">
 </a>
     </div>
+<div class="center" id="stickersRow" style="margin-top:10px">
+  <a class="btn secondary" id="dlStickersBtn" href="https://store.line.me/stickershop/product/31976517/zh-Hant?utm_source=gnsh_stickerDetail"" style="display:inline-flex; align-items:center; gap:6px;" target="_blank" rel="noopener noreferrer">
+    <span>下載小旅伴LINE貼圖</span>
+    <img src="https://static.wixstatic.com/media/ba9378_b31700c2894f4cbba9e2c0048ed232ba~mv2.png" alt="" style="height:1.1em; width:auto; vertical-align:middle;">
+  </a>
+</div>
+
 
     
 
@@ -1805,5 +1812,30 @@ document.getElementById("shareThreads").onclick=()=>window.open(`https://www.thr
 })();
 </script>
 
-</body>
+<script>
+(function(){
+  function onReady(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  onReady(function(){
+    var a = document.getElementById('dlStickersBtn');
+    if(a){
+      try { a.setAttribute('target','_blank'); } catch(e){}
+      var rel=(a.getAttribute('rel')||'').split(/\s+/).filter(Boolean);
+      if(rel.indexOf('noopener')===-1) rel.push('noopener');
+      if(rel.indexOf('noreferrer')===-1) rel.push('noreferrer');
+      a.setAttribute('rel', rel.join(' '));
+      a.addEventListener('click', function(e){
+        // Only act if default isn't already going to open a new tab; then enforce
+        try{
+          if(a.href){
+            // Let browser handle opening in new tab due to target; this is a safety net if other code prevents it
+            e.stopImmediatePropagation();
+            // If another script calls preventDefault, we still try to open a new tab here
+            if(e.defaultPrevented){ window.open(a.href, '_blank', 'noopener'); }
+          }
+        }catch(err){}
+      }, true); // capture-phase only on this anchor
+    }
+  });
+})();
+</script></body>
 </html>
